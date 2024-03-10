@@ -16,14 +16,23 @@ public class RandomTestService : IHostedService
     public RandomTestService(DeviceStateManager _deviceStateManager)
     {
         deviceStateManager = _deviceStateManager;
+        
 
         _timer.Elapsed += _timer_Elapsed;
     }
 
     private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
-        deviceStateManager.SetSubTargetConnectState(TargetConnectState.Lost);
+        //deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
+        //deviceStateManager.SetSubTargetConnectState(TargetConnectState.Lost);
+        //if (deviceStateManager.IsConnected())
+        //{
+        //    deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
+        //}
+        //else
+        //{
+        //    deviceStateManager.SetMainTargetConnectState(TargetConnectState.Lost);
+        //}
 
         int level1 = deviceStateManager.BatteryLevel1 + random.Next(-3, 3);
         int level2 = deviceStateManager.BatteryLevel2 + random.Next(-3, 3);
@@ -39,6 +48,8 @@ public class RandomTestService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _timer.Start();
+        deviceStateManager.Open("COM1", 57600);
+
         return Task.CompletedTask;
     }
 

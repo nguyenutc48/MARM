@@ -1,9 +1,10 @@
 ﻿using MARM.Enums;
+using System.IO.Ports;
 using System.Reflection.Emit;
 
 namespace MARM.Services;
 
-public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager
+public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, ISerialCommunication
 {
     public event Action<TargetConnectState>? MainTargetConnectStateChanged;
     public TargetConnectState MainTargetConnectState { get; private set; }
@@ -16,6 +17,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public int BatteryLevel2 { get; private set; }
 
     public event Action<int, bool>? LightStateChanged;
+
+    // Serial port
+    private SerialPort serialPort;
+    private bool listening;
+    public event EventHandler<string> DataReceived;
+
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
     public bool Light3 { get; private set; }
@@ -94,5 +101,66 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             BatteryLevel2 = level2;
             BatteryLevelChanged?.Invoke(BatteryLevel1, BatteryLevel2);
         }
+    }
+
+    public void Open(string comPort, int baudrate)
+    {
+        try
+        {
+            serialPort = new SerialPort(comPort, baudrate);
+            serialPort.DataReceived += SerialPort_DataReceived;
+            serialPort.Open();
+            listening = true;
+        }
+        catch (Exception ex)
+        {
+            var a = ex.Message;
+        }
+    }
+
+    private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+        SerialPort sp = (SerialPort)sender;
+        string data = sp.ReadExisting().Trim();
+        if (data == "a") SetMainTargetConnectState(TargetConnectState.Good);
+        if (data == "b") SetMainTargetConnectState(TargetConnectState.Lost);
+        OnDataReceived(data);
+    }
+
+    protected virtual void OnDataReceived(string data)
+    {
+        DataReceived?.Invoke(this, data);
+    }
+
+    public void Close()
+    {
+        try
+        {
+            serialPort.DataReceived -= SerialPort_DataReceived;
+            serialPort.Close();
+            listening = false;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    public async Task SendData(string data)
+    {
+        await Task.Delay(100);
+        serialPort.WriteLine(data);
+    }
+
+    public async Task<string> ReadData()
+    {
+        await Task.Delay(100);
+        return serialPort.ReadLine();
+    }
+
+    public bool IsConnected()
+    {
+        return listening;
     }
 }

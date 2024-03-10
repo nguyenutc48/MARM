@@ -1,5 +1,9 @@
 ﻿@using ElectronNET.API
+@using MARM.Services
 @inherits LayoutComponentBase
+
+@inject NavigationManager NavigationManager
+@inject IPagesController PageControl
 
 <PageTitle>MARM</PageTitle>
 
@@ -59,8 +63,14 @@
     private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
     private int currentLinkIndex = 0;
 
-    [Inject]
-    private NavigationManager NavigationManager { get; set; }
+    // [Inject]
+    // private NavigationManager NavigationManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+    }
 
     private void NavigateBack()
     {

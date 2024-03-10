@@ -6,7 +6,7 @@
   "name": "MARM",
   "author": "",
   "singleInstance": true,
-  "environment": "Production",
+  "environment": "Development",
   "build": {
     "appId": "com.MARM.app",
     "productName": "MARM",
