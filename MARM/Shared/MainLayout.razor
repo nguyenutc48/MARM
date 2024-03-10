@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using ElectronNET.API
+@inherits LayoutComponentBase
 
 <PageTitle>MARM</PageTitle>
 
@@ -6,6 +7,7 @@
     <header class="d-flex flex-column align-items-center">
         <img class="w-100 h-100" src="images/Picture1.png" />
         <h2 class="my-1 w-auto fw-bold">MÁY TÍNH TRUNG TÂM GIÁM SÁT KẾT QUẢ BẮN PHÁO TRÊN BIỂN</h2>
+
     </header>
     <main>
         <div>
@@ -14,7 +16,7 @@
     </main>
     <footer class="w-100 d-flex justify-content-between align-items-center" style="background-color: #FFD966;">
         <div>
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
+            <MudIconButton @onclick="NavigateBack" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
         </div>
         <div class="d-flex flex-row align-items-center">
             <div class="nav-item">
@@ -37,9 +39,14 @@
                     <span class="mdi mdi-ship-wheel mdi-24px" aria-hidden="true"></span> Quản lý đơn vị
                 </NavLink>
             </div>
+            <!-- Thêm nút close -->
+            <div class="nav-item">
+                <MudIconButton @onclick="CloseApp" Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+            </div>
         </div>
+
         <div>
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+            <MudIconButton @onclick="NavigateForward" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
         </div>
     </footer>
 </div>
@@ -47,3 +54,41 @@
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+
+@code {
+    private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
+    private int currentLinkIndex = 0;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private void NavigateBack()
+    {
+        if (currentLinkIndex > 0)
+        {
+            currentLinkIndex--;
+            NavigationManager.NavigateTo(navLinks[currentLinkIndex]);
+        }
+    }
+
+    private void NavigateForward()
+    {
+        if (currentLinkIndex < navLinks.Count - 1)
+        {
+            currentLinkIndex++;
+            NavigationManager.NavigateTo(navLinks[currentLinkIndex]);
+        }
+    }
+
+    private void NavigateToLink(string link)
+    {
+        currentLinkIndex = navLinks.IndexOf(link);
+    }
+
+    // Phương thức đóng ứng dụng
+    private void CloseApp()
+    {
+        Electron.WindowManager.BrowserWindows.First().Close();
+    }
+}
+
