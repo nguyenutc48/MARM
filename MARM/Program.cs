@@ -21,9 +21,9 @@ builder.Services.AddSingleton<DeviceStateManager>();
 builder.Services.AddSingleton<ITargetConnectStateManager>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ILightController>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ITransmitterDeviceManager>(sp => sp.GetRequiredService<DeviceStateManager>());
-builder.Services.AddSingleton<ISerialCommunication>(sp => sp.GetRequiredService<DeviceStateManager>());
+builder.Services.AddSingleton<IComDataService>(sp => sp.GetRequiredService<DeviceStateManager>());
 
-builder.Services.AddSingleton<IPagesController, PagesController>();
+builder.Services.AddSingleton<IPageNavigationService, PageNavigationService>();
 
 builder.Services.AddSingleton<MissionManager>();
 

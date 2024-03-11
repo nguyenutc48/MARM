@@ -2,8 +2,7 @@
 @using MARM.Services
 @inherits LayoutComponentBase
 
-@inject NavigationManager NavigationManager
-@inject IPagesController PageControl
+
 
 <PageTitle>MARM</PageTitle>
 
@@ -63,13 +62,31 @@
     private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
     private int currentLinkIndex = 0;
 
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+    [Inject]
+    private IComDataService ComDataService { get; set; }
     // [Inject]
-    // private NavigationManager NavigationManager { get; set; }
-
+    // private IPageNavigationService PageNavigationService { get; set; }
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        ComDataService.DataReceived += HandleDataReceived;
+    }
 
+    private void HandleDataReceived(object sender, string data)
+    {
+        Console.WriteLine(data);
+        // if(data == "a")
+        // {
+        //     currentLinkIndex++;
+        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
+        // }
+        // if(data == "b")
+        // {
+        //     currentLinkIndex--;
+        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
+        // }
     }
 
     private void NavigateBack()
@@ -77,7 +94,7 @@
         if (currentLinkIndex > 0)
         {
             currentLinkIndex--;
-            NavigationManager.NavigateTo(navLinks[currentLinkIndex]);
+            NavigateToLink(navLinks[currentLinkIndex]);
         }
     }
 
@@ -86,19 +103,25 @@
         if (currentLinkIndex < navLinks.Count - 1)
         {
             currentLinkIndex++;
-            NavigationManager.NavigateTo(navLinks[currentLinkIndex]);
+            NavigateToLink(navLinks[currentLinkIndex]);
         }
     }
 
     private void NavigateToLink(string link)
     {
         currentLinkIndex = navLinks.IndexOf(link);
+        NavigationManager.NavigateTo(link);
     }
 
     // Phương thức đóng ứng dụng
     private void CloseApp()
     {
         Electron.WindowManager.BrowserWindows.First().Close();
+    }
+
+    public void Dispose()
+    {
+        ComDataService.DataReceived -= HandleDataReceived;
     }
 }
 

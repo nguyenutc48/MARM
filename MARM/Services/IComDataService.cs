@@ -1,8 +1,8 @@
 ﻿namespace MARM.Services
 {
-    public interface ISerialCommunication
+    public interface IComDataService
     {
-        event EventHandler<string> DataReceived;
+        event EventHandler<string>? DataReceived;
         void Open(string comPort, int baudrate);
         void Close();
         bool IsConnected();

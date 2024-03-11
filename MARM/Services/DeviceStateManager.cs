@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 
 namespace MARM.Services;
 
-public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, ISerialCommunication
+public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, IComDataService
 {
     public event Action<TargetConnectState>? MainTargetConnectStateChanged;
     public TargetConnectState MainTargetConnectState { get; private set; }
@@ -21,7 +21,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     // Serial port
     private SerialPort serialPort;
     private bool listening;
-    public event EventHandler<string> DataReceived;
+    public event EventHandler<string>? DataReceived;
 
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
@@ -122,8 +122,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     {
         SerialPort sp = (SerialPort)sender;
         string data = sp.ReadExisting().Trim();
-        if (data == "a") SetMainTargetConnectState(TargetConnectState.Good);
-        if (data == "b") SetMainTargetConnectState(TargetConnectState.Lost);
+        //if (data == "a") SetMainTargetConnectState(TargetConnectState.Good);
+        //if (data == "b") SetMainTargetConnectState(TargetConnectState.Lost);
         OnDataReceived(data);
     }
 
