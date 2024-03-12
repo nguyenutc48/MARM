@@ -76,35 +76,45 @@
 
     private void HandleDataReceived(object sender, string data)
     {
-        Console.WriteLine(data);
-        // if(data == "a")
-        // {
-        //     currentLinkIndex++;
-        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
-        // }
-        // if(data == "b")
-        // {
-        //     currentLinkIndex--;
-        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
-        // }
+        _ = InvokeAsync(() =>
+        {
+            if (data == "a")
+            {
+                currentLinkIndex = (currentLinkIndex + 1) % navLinks.Count;
+            }
+            if(data == "b")
+            {
+                if (currentLinkIndex == 0)
+                {
+                    currentLinkIndex = navLinks.Count - 1; 
+                }
+                else
+                {
+                    currentLinkIndex--;
+                }
+            }
+            NavigateToLink(navLinks[currentLinkIndex]);
+            StateHasChanged();
+        });
     }
 
     private void NavigateBack()
     {
-        if (currentLinkIndex > 0)
+        if (currentLinkIndex == 0)
+        {
+            currentLinkIndex = navLinks.Count - 1; 
+        }
+        else
         {
             currentLinkIndex--;
-            NavigateToLink(navLinks[currentLinkIndex]);
         }
+        NavigateToLink(navLinks[currentLinkIndex]);
     }
 
     private void NavigateForward()
     {
-        if (currentLinkIndex < navLinks.Count - 1)
-        {
-            currentLinkIndex++;
-            NavigateToLink(navLinks[currentLinkIndex]);
-        }
+        currentLinkIndex = (currentLinkIndex + 1) % navLinks.Count;
+        NavigateToLink(navLinks[currentLinkIndex]);
     }
 
     private void NavigateToLink(string link)
