@@ -23,9 +23,10 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     private SerialPort serialPort;
     private bool listening;
     private int _pageIndex;
-    public event EventHandler<string>? DataReceived;
-    public event EventHandler<int>? PageChanged;
-    public List<string> Pages { get; set; } = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
+    public event Action<string>? DataReceived;
+
+    public event Action<int>? PageChanged;
+    public int TotalPage { get; set; }
 
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
@@ -39,6 +40,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         SubTargetConnectState = TargetConnectState.Lost;
         BatteryLevel1 = 50;
         BatteryLevel2 = 50;
+        _pageIndex = 0;
     }
 
     public void SetMainTargetConnectState(TargetConnectState targetConnectState)
@@ -107,6 +109,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         }
     }
 
+    #region Comport
+
     public void Open(string comPort, int baudrate)
     {
         try
@@ -126,14 +130,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     {
         SerialPort sp = (SerialPort)sender;
         string data = sp.ReadExisting().Trim();
-        //if (data == "a") SetMainTargetConnectState(TargetConnectState.Good);
-        //if (data == "b") SetMainTargetConnectState(TargetConnectState.Lost);
         OnDataReceived(data);
     }
 
     protected virtual void OnDataReceived(string data)
     {
-        DataReceived?.Invoke(this, data);
+        DataReceived?.Invoke(data);
     }
 
     public void Close()
@@ -168,36 +170,36 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         return listening;
     }
 
+    #endregion
+
     public void NavigateTo(int pageIndex)
     {
-        if(_pageIndex > Pages.Count || _pageIndex < 0)
-            _pageIndex = 0;
-        else
-            _pageIndex = pageIndex;
-        PageChanged?.Invoke(this, _pageIndex);
+        if (pageIndex < 0 || pageIndex > TotalPage) _pageIndex = 0;
+        else _pageIndex = pageIndex;
+        PageChanged?.Invoke(_pageIndex);
     }
 
     public void NavigateTo(string url)
     {
-        PageChanged?.Invoke(this, _pageIndex);
+        PageChanged?.Invoke(_pageIndex);
     }
 
     public void NavigateBack()
     {
         if (_pageIndex == 0)
         {
-            _pageIndex = Pages.Count - 1; 
+            _pageIndex = TotalPage - 1; 
         }
         else
         {
             _pageIndex--;
         }
-        PageChanged?.Invoke(this, _pageIndex);
+        PageChanged?.Invoke(_pageIndex);
     }
 
     public void NavigateForward()
     {
-        _pageIndex = (_pageIndex + 1) % Pages.Count;
-        PageChanged?.Invoke(this, _pageIndex);
+        _pageIndex = (_pageIndex + 1) % TotalPage;
+        PageChanged?.Invoke(_pageIndex);
     }
 }

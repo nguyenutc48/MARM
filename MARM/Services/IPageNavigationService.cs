@@ -2,9 +2,9 @@
 {
     public interface IPageNavigationService
     {
-        event EventHandler<int> PageChanged;
+        event Action<int> PageChanged;
+        int TotalPage { get; set; }
         void NavigateTo(int pageIndex);
-        void NavigateTo(string url);
         void NavigateBack();
         void NavigateForward();
     }
