@@ -59,8 +59,8 @@
 <MudSnackbarProvider />
 
 @code {
-    private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
-    private int currentLinkIndex = 0;
+    // private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
+    // private int currentLinkIndex = 0;
 
 
     [Inject]
@@ -72,9 +72,8 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        PageNavigationService.PageChanged += HandlePageChanged;
+        // PageNavigationService.PageChanged += HandlePageChanged;
         PageNavigationService.NavigateTo(0);
-        PageNavigationService.Pages = navLinks;
 
         //ComDataService.DataReceived += HandleDataReceived;
     }
@@ -94,30 +93,35 @@
     // }
     //}
 
-    private void HandlePageChanged(object sender, int pageIndex)
-    {
-        _ = InvokeAsync(() =>
-        {
-            NavigateToLink(navLinks[pageIndex]);
-            StateHasChanged();
-        });
-    }
+    // private void HandlePageChanged(object sender, int pageIndex)
+    // {
+    //     _ = InvokeAsync(() =>
+    //     {
+    //         PageNavigationService.NavigateTo(pageIndex)
+    //         StateHasChanged();
+    //     });
+    // }
 
     private void NavigateBack()
     {
-        PageNavigationService.NavigateBack();
+        _ = InvokeAsync(() =>
+        {
+            PageNavigationService.NavigateBack();
+            StateHasChanged();
+        });
+
     }
 
     private void NavigateForward()
     {
-        PageNavigationService.NavigateForward();
+        _ = InvokeAsync(() =>
+        {
+            PageNavigationService.NavigateForward();
+            StateHasChanged();
+        });
+       
     }
 
-    private void NavigateToLink(string link)
-    {
-        currentLinkIndex = navLinks.IndexOf(link);
-        NavigationManager.NavigateTo(link);
-    }
 
     // Phương thức đóng ứng dụng
     private void CloseApp()
@@ -128,7 +132,7 @@
     public void Dispose()
     {
         //ComDataService.DataReceived -= HandleDataReceived;
-        PageNavigationService.PageChanged -= HandlePageChanged;
+        // PageNavigationService.PageChanged -= HandlePageChanged;
     }
 }
 

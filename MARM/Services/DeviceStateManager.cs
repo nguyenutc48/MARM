@@ -1,4 +1,5 @@
 ﻿using MARM.Enums;
+using Microsoft.AspNetCore.Components;
 using System.IO.Ports;
 using System.Reflection.Emit;
 
@@ -20,11 +21,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     // Serial port
     private SerialPort serialPort;
+    private NavigationManager navigationManager;
     private bool listening;
     private int _pageIndex;
     public event EventHandler<string>? DataReceived;
     public event EventHandler<int>? PageChanged;
-    public List<string> Pages { get; set; } = new List<string>();
+    public List<string> Pages { get; set; } = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
 
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
@@ -173,6 +175,13 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             _pageIndex = 0;
         else
             _pageIndex = pageIndex;
+        NavigateTo(Pages[_pageIndex]);
+        PageChanged?.Invoke(this, _pageIndex);
+    }
+
+    public void NavigateTo(string url)
+    {
+        navigationManager.NavigateTo(url);
         PageChanged?.Invoke(this, _pageIndex);
     }
 
@@ -186,12 +195,14 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         {
             _pageIndex--;
         }
+        NavigateTo(_pageIndex);
         PageChanged?.Invoke(this, _pageIndex);
     }
 
     public void NavigateForward()
     {
         _pageIndex = (_pageIndex + 1) % Pages.Count;
+        NavigateTo(_pageIndex);
         PageChanged?.Invoke(this, _pageIndex);
     }
 }
