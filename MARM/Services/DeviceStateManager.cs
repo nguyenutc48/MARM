@@ -111,12 +111,10 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             serialPort.DataReceived += SerialPort_DataReceived;
             serialPort.Open();
             listening = true;
-            Console.WriteLine("Opened");
         }
         catch (Exception ex)
         {
             var a = ex.Message;
-            Console.WriteLine(a);
         }
     }
 
@@ -124,9 +122,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     {
         SerialPort sp = (SerialPort)sender;
         string data = sp.ReadExisting().Trim();
-        Console.WriteLine(data);
-        if (data == "c") SetMainTargetConnectState(TargetConnectState.Good);
-        if (data == "d") SetMainTargetConnectState(TargetConnectState.Lost);
+        //if (data == "a") SetMainTargetConnectState(TargetConnectState.Good);
+        //if (data == "b") SetMainTargetConnectState(TargetConnectState.Lost);
         OnDataReceived(data);
     }
 
