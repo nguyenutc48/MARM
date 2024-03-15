@@ -2,7 +2,7 @@
 {
     public interface IComDataService
     {
-        event Action<string>? DataReceived;
+        event Action<byte[]>? DataReceived;
         void Open(string comPort, int baudrate);
         void Close();
         bool IsConnected();

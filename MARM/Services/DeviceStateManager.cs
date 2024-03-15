@@ -23,7 +23,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     private SerialPort serialPort;
     private bool listening;
     private int _pageIndex;
-    public event Action<string>? DataReceived;
+    public event Action<byte[]>? DataReceived;
+    private byte[] buffer = new byte[255];
 
     public event Action<int>? PageChanged;
     public int TotalPage { get; set; }
@@ -128,12 +129,22 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
-        SerialPort sp = (SerialPort)sender;
-        string data = sp.ReadExisting().Trim();
+        //SerialPort sp = (SerialPort)sender;
+        //string data = sp.ReadExisting().Trim();
+        var data = GetFrame(serialPort);
         OnDataReceived(data);
+
+        if (data[4] == 0x06)
+        {
+            NavigateBack();
+        }
+        else
+        {
+            NavigateForward();
+        }
     }
 
-    protected virtual void OnDataReceived(string data)
+    protected virtual void OnDataReceived(byte[] data)
     {
         DataReceived?.Invoke(data);
     }
@@ -170,8 +181,41 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         return listening;
     }
 
-    #endregion
+    private byte[] GetFrame(SerialPort serialPort)
+    {
+        int bytesRead = serialPort.Read(buffer, 0, buffer.Length);
+        if (bytesRead < 6)
+        {
+            Console.WriteLine(bytesRead.ToString());
+            int startFrameIndex = Array.IndexOf(buffer, (byte)0x02);
+            int endFrameIndex = Array.IndexOf(buffer, (byte)0x03);
+            if (startFrameIndex >= 0 && endFrameIndex >= 0)
+            {
+                // Khởi tạo mảng mới để lưu trữ dữ liệu được sao chép
+                byte[] receivedFrame = new byte[endFrameIndex - startFrameIndex + 1];
 
+                // Sao chép dữ liệu từ mảng gốc sang mảng mới
+                Array.Copy(buffer, startFrameIndex, receivedFrame, 0, endFrameIndex - startFrameIndex + 1);
+
+                // In ra mảng đã sao chép để kiểm tra
+                Console.WriteLine("Copied Bytes: " + BitConverter.ToString(receivedFrame));
+                return receivedFrame;
+            }
+            else
+            {
+                Console.WriteLine("Không tìm thấy byte 0x02 hoặc 0x03 trong mảng gốc.");
+                return buffer;
+            }
+        }
+        else 
+        {
+            Console.WriteLine("Không đủ data");
+            return buffer; 
+        }
+    }
+
+    #endregion
+    #region NextPage
     public void NavigateTo(int pageIndex)
     {
         if (pageIndex < 0 || pageIndex > TotalPage) _pageIndex = 0;
@@ -202,4 +246,5 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         _pageIndex = (_pageIndex + 1) % TotalPage;
         PageChanged?.Invoke(_pageIndex);
     }
+    #endregion
 }
