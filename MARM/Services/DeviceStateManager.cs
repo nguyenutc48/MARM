@@ -21,7 +21,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     // Serial port
     private SerialPort serialPort;
-    private NavigationManager navigationManager;
     private bool listening;
     private int _pageIndex;
     public event EventHandler<string>? DataReceived;
@@ -175,13 +174,11 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             _pageIndex = 0;
         else
             _pageIndex = pageIndex;
-        NavigateTo(Pages[_pageIndex]);
         PageChanged?.Invoke(this, _pageIndex);
     }
 
     public void NavigateTo(string url)
     {
-        navigationManager.NavigateTo(url);
         PageChanged?.Invoke(this, _pageIndex);
     }
 
@@ -195,14 +192,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         {
             _pageIndex--;
         }
-        NavigateTo(_pageIndex);
         PageChanged?.Invoke(this, _pageIndex);
     }
 
     public void NavigateForward()
     {
         _pageIndex = (_pageIndex + 1) % Pages.Count;
-        NavigateTo(_pageIndex);
         PageChanged?.Invoke(this, _pageIndex);
     }
 }
