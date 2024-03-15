@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 
 namespace MARM.Services;
 
-public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, IComDataService
+public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, IComDataService, IPageNavigationService
 {
     public event Action<TargetConnectState>? MainTargetConnectStateChanged;
     public TargetConnectState MainTargetConnectState { get; private set; }
@@ -21,7 +21,10 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     // Serial port
     private SerialPort serialPort;
     private bool listening;
+    private int _pageIndex;
     public event EventHandler<string>? DataReceived;
+    public event EventHandler<int>? PageChanged;
+    public List<string> Pages { get; set; } = new List<string>();
 
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
@@ -162,5 +165,33 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public bool IsConnected()
     {
         return listening;
+    }
+
+    public void NavigateTo(int pageIndex)
+    {
+        if(_pageIndex > Pages.Count || _pageIndex < 0)
+            _pageIndex = 0;
+        else
+            _pageIndex = pageIndex;
+        PageChanged?.Invoke(this, _pageIndex);
+    }
+
+    public void NavigateBack()
+    {
+        if (_pageIndex == 0)
+        {
+            _pageIndex = Pages.Count - 1; 
+        }
+        else
+        {
+            _pageIndex--;
+        }
+        PageChanged?.Invoke(this, _pageIndex);
+    }
+
+    public void NavigateForward()
+    {
+        _pageIndex = (_pageIndex + 1) % Pages.Count;
+        PageChanged?.Invoke(this, _pageIndex);
     }
 }

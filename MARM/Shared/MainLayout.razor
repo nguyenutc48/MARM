@@ -62,49 +62,55 @@
     private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
     private int currentLinkIndex = 0;
 
+
     [Inject]
     private NavigationManager NavigationManager { get; set; }
+    //[Inject]
+    //private IComDataService ComDataService { get; set; }
     [Inject]
-    private IComDataService ComDataService { get; set; }
-    // [Inject]
-    // private IPageNavigationService PageNavigationService { get; set; }
+    private IPageNavigationService PageNavigationService { get; set; }
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        ComDataService.DataReceived += HandleDataReceived;
+        PageNavigationService.PageChanged += HandlePageChanged;
+        PageNavigationService.NavigateTo(0);
+        PageNavigationService.Pages = navLinks;
+
+        //ComDataService.DataReceived += HandleDataReceived;
     }
 
-    private void HandleDataReceived(object sender, string data)
+    //private void HandleDataReceived(object sender, string data)
+    //{
+    //    Console.WriteLine(data);
+    // if(data == "a")
+    // {
+    //     currentLinkIndex++;
+    //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
+    // }
+    // if(data == "b")
+    // {
+    //     currentLinkIndex--;
+    //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
+    // }
+    //}
+
+    private void HandlePageChanged(object sender, int pageIndex)
     {
-        Console.WriteLine(data);
-        // if(data == "a")
-        // {
-        //     currentLinkIndex++;
-        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
-        // }
-        // if(data == "b")
-        // {
-        //     currentLinkIndex--;
-        //     PageNavigationService.NavigateTo(navLinks[currentLinkIndex]);
-        // }
+        _ = InvokeAsync(() =>
+        {
+            NavigateToLink(navLinks[pageIndex]);
+            StateHasChanged();
+        });
     }
 
     private void NavigateBack()
     {
-        if (currentLinkIndex > 0)
-        {
-            currentLinkIndex--;
-            NavigateToLink(navLinks[currentLinkIndex]);
-        }
+        PageNavigationService.NavigateBack();
     }
 
     private void NavigateForward()
     {
-        if (currentLinkIndex < navLinks.Count - 1)
-        {
-            currentLinkIndex++;
-            NavigateToLink(navLinks[currentLinkIndex]);
-        }
+        PageNavigationService.NavigateForward();
     }
 
     private void NavigateToLink(string link)
@@ -121,7 +127,8 @@
 
     public void Dispose()
     {
-        ComDataService.DataReceived -= HandleDataReceived;
+        //ComDataService.DataReceived -= HandleDataReceived;
+        PageNavigationService.PageChanged -= HandlePageChanged;
     }
 }
 
