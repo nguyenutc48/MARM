@@ -48,7 +48,7 @@ public class RandomTestService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _timer.Start();
-        deviceStateManager.Open("COM1", 57600);
+        deviceStateManager.Open("COM16", 57600);
 
         return Task.CompletedTask;
     }
