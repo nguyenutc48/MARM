@@ -23,16 +23,16 @@ public class RandomTestService : IHostedService
 
     private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        //deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
-        //deviceStateManager.SetSubTargetConnectState(TargetConnectState.Lost);
-        //if (deviceStateManager.IsConnected())
-        //{
-        //    deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
-        //}
-        //else
-        //{
-        //    deviceStateManager.SetMainTargetConnectState(TargetConnectState.Lost);
-        //}
+        deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
+        deviceStateManager.SetSubTargetConnectState(TargetConnectState.Lost);
+        if (deviceStateManager.IsConnected())
+        {
+            deviceStateManager.SetMainTargetConnectState(TargetConnectState.Good);
+        }
+        else
+        {
+            deviceStateManager.SetMainTargetConnectState(TargetConnectState.Lost);
+        }
 
         int level1 = deviceStateManager.BatteryLevel1 + random.Next(-3, 3);
         int level2 = deviceStateManager.BatteryLevel2 + random.Next(-3, 3);
