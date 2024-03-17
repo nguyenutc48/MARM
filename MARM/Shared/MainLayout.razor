@@ -63,13 +63,12 @@
     private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
     private int currentLinkIndex = 0;
 
-
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
         pageNavi.PageChanged += HandlePageChanged;
         pageNavi.TotalPage = 4;
+        pageNavi.NavigateTo(0);
     }
 
     private void HandlePageChanged(int pageIndex)
