@@ -58,14 +58,15 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public bool Light3 { get; private set; }
     public bool Light4 { get; private set; }
 
-    public DeviceStateManager(SerialPort _serialPort)
+
+    public DeviceStateManager()
     {
         MainTargetConnectState = TargetConnectState.Lost;
         SubTargetConnectState = TargetConnectState.Lost;
         BatteryLevel1 = 50;
         BatteryLevel2 = 50;
         _pageIndex = 0;
-        //SendUpdateStatus();
+        SendUpdateStatus();
     }
 
     public void SetMainTargetConnectState(TargetConnectState targetConnectState)
@@ -93,7 +94,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                 if (Light1 != state)
                 {
                     Light1 = state;
-                    SendOutputTransmiter(0, state);
+                    await SendOutputTransmiter(0, state);
                     LightStateChanged?.Invoke(0, state);
                 }
                 break;
@@ -101,7 +102,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                 if (Light2 != state)
                 {
                     Light2 = state;
-                    SendOutputTransmiter(1, state);
+                    await SendOutputTransmiter(1, state);
                     LightStateChanged?.Invoke(1, state);
                 }
                 break;
@@ -109,7 +110,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                 if (Light3 != state)
                 {
                     Light3 = state;
-                    SendOutputTransmiter(2, state);
+                    await SendOutputTransmiter(2, state);
                     LightStateChanged?.Invoke(2, state);
                 }
                 break;
@@ -117,7 +118,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                 if (Light4 != state)
                 {
                     Light4 = state;
-                    SendOutputTransmiter(3, state);
+                    await SendOutputTransmiter(3, state);
                     LightStateChanged?.Invoke(3, state);
                 }
                 break;
@@ -230,14 +231,14 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             }
 
         }
-        //Console.WriteLine(_dataSendReceived.ToString("x2"));
+        Console.WriteLine(_dataSendReceived.ToString("x2"));
 
-        //if (data[3] == _dataSendReceived)
-        //{
-        //    _isDataSendReceived = false;
-        //    Console.WriteLine("vao day");
-        //    SendUpdateStatus();
-        //}    
+        if (data[3] == _dataSendReceived)
+        {
+            _isDataSendReceived = false;
+            Console.WriteLine("vao day");
+            SendUpdateStatus();
+        }    
             
     }
 
@@ -375,11 +376,13 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         return CRC;
     }
 
-    private void SendOutputTransmiter(int lightNumber, bool state)
+    private async Task SendOutputTransmiter(int lightNumber, bool state)
     {
+        _isDataSendReceived = true;
         byte[] frame = new byte[3];
         frame[0] = 0x06;
         frame[1] = 0x00;
+        _dataSendReceived = frame[0];
 
         byte byteValue = 0x00; // Khởi tạo byte với giá trị ban đầu là 0x00
         byteValue |= (byte)(lightNumber << 4); // Dịch số 3 vào 4 bit cao
@@ -390,11 +393,11 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
         frame[2] = byteValue;
         Console.WriteLine("Frame"+ lightNumber+";"+state+" Light Control Bytes: " + BitConverter.ToString(frame)); 
-        SendFrame(frame);
+        await SendFrame(frame);
 
     }
 
-    private void SendOutputReceived(int lightNumber, bool state)
+    private async Task SendOutputReceived(int lightNumber, bool state)
     {
         byte[] frame = new byte[2];
         frame[0] = 0x05;
@@ -408,24 +411,25 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
         frame[1] = byteValue;
         Console.WriteLine("Frame" + lightNumber + ";" + state + " Light Control Bytes: " + BitConverter.ToString(frame));
-        SendFrame(frame);
+        await SendFrame(frame);
 
     }
 
-    public void SendUpdateStatus()
+    public async void SendUpdateStatus()
     {
         byte[] frame = new byte[1];
         frame[0] = 0x01;
-        SendFrame(frame);
+        await SendFrame(frame);
     }
 
     
-    public void SendByte(byte[] data)
+    public async Task SendByte(byte[] data)
     {
+        await Task.Delay(100);
         serialPort.Write(data, 0, data.Length);
     }
 
-    public void SendFrame(byte[] data)
+    public async Task SendFrame(byte[] data)
     {
         byte[] dataSend = new byte[data.Length + 5];
         if (_indexSend == 255) _indexSend = 0;
@@ -438,7 +442,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         dataSend[dataSend.Length - 2] = GetCRC(dataSend);
         Console.WriteLine("Send Bytes: " + BitConverter.ToString(dataSend));
 
-        SendByte(dataSend);
+        await SendByte(dataSend);
 
     }
 
@@ -472,7 +476,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     #endregion
     #region NextPage
     private List<int> pageLightCode = new List<int> { 4,3,2,1};
-    public void NavigateTo(int pageIndex)
+    public async void NavigateTo(int pageIndex)
     {
         if (pageIndex < 0 || pageIndex > TotalPage) _pageIndex = 0;
         else _pageIndex = pageIndex;
@@ -480,13 +484,13 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         for (int i = 0; i < pageLightCode.Count; i++)
         {
             if (i == pageIndex)
-                SendOutputReceived(pageLightCode[i], true);
+                await SendOutputReceived(pageLightCode[i], true);
             else
-                SendOutputReceived(pageLightCode[i], false);
+                await SendOutputReceived(pageLightCode[i], false);
         }
     }
 
-    public void NavigateBack()
+    public async void NavigateBack()
     {
         if (_pageIndex == 0)
         {
@@ -500,23 +504,23 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         for (int i = 0; i < pageLightCode.Count; i++)
         {
             if (i == _pageIndex)
-                SendOutputReceived(pageLightCode[i], true);
+                await SendOutputReceived(pageLightCode[i], true);
             else
-                SendOutputReceived(pageLightCode[i], false);
+                await SendOutputReceived(pageLightCode[i], false);
         }
 
     }
 
-    public void NavigateForward()
+    public async void NavigateForward()
     {
         _pageIndex = (_pageIndex + 1) % TotalPage;
         PageChanged?.Invoke(_pageIndex);
         for (int i = 0; i < pageLightCode.Count; i++)
         {
             if (i == _pageIndex)
-                SendOutputReceived(pageLightCode[i], true);
+                await SendOutputReceived(pageLightCode[i], true);
             else
-                SendOutputReceived(pageLightCode[i], false);
+                await SendOutputReceived(pageLightCode[i], false);
         }
 
     }

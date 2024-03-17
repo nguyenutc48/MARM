@@ -25,9 +25,7 @@ public class RandomTestService : IHostedService
     private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
 
-        //if(deviceStateManager._isDataSendReceived == false)
         deviceStateManager.SendUpdateStatus();
-
     }
 
 

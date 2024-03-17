@@ -8,6 +8,6 @@
         bool IsConnected();
         Task SendData(string data);
         Task<string> ReadData();
-        void SendByte(byte[] data);
+        Task SendByte(byte[] data);
     }
 }
