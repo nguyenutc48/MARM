@@ -28,6 +28,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public event Action<byte[]>? DataReceived;
     private byte[] buffer = new byte[255];
     private int _indexSend = 0;
+    private bool _isDataSendReceived = false;
+    private byte _dataSendReceived = 0x00;
 
     public event Action<int>? PageChanged;
     public int TotalPage { get; set; }
@@ -136,6 +138,26 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         }
     }
 
+    public void SetBattery(int batteryNumber, int level)
+    {
+        if(batteryNumber == 1)
+        {
+            if(level != BatteryLevel1)
+            {
+                BatteryLevel1 = level;
+                BatteryLevelChanged?.Invoke(BatteryLevel1, BatteryLevel2);
+            }
+        }
+        if (batteryNumber == 2)
+        {
+            if (level != BatteryLevel2)
+            {
+                BatteryLevel2 = level;
+                BatteryLevelChanged?.Invoke(BatteryLevel1, BatteryLevel2);
+            }
+        }
+    }
+
     #region Comport
 
     public void Open(string comPort, int baudrate)
@@ -155,10 +177,10 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
     {
-        //SerialPort sp = (SerialPort)sender;
-        //string data = sp.ReadExisting().Trim();
         var data = GetFrame(serialPort);
         OnDataReceived(data);
+        //if (data[3] == _dataSendReceived)
+        //    _isDataSendReceived = true;
 
         // Button check
         if (IsButtonInput(data))
@@ -188,7 +210,33 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             }
         }
 
+        // 
+        if (IsStatusUpdate(data))
+        {
+            switch (data[4])
+            {
+                case 0x00: //mach chinh
+                    SetBattery(1, (int)data[5]);
+                    if (data[6] == 0xFF) SetMainTargetConnectState(TargetConnectState.Good);
+                    else SetMainTargetConnectState(TargetConnectState.Lost);
+                    break;
+                case 0x01: // mach phu
+                    SetBattery(2, (int)data[5]);
+                    if (data[6] == 0xFF) SetSubTargetConnectState(TargetConnectState.Good);
+                    else SetSubTargetConnectState(TargetConnectState.Lost);
+                    break;
+                default:
+                    break;
+            }
 
+        }
+    }
+
+    private bool IsStatusUpdate(byte[] data)
+    {
+        if (data[3] == 0x01)
+            return true;
+        else return false;
     }
 
     private bool IsButtonInput(byte[] data)
@@ -243,7 +291,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     private byte[] GetFrame(SerialPort serialPort)
     {
         int bytesRead = serialPort.Read(buffer, 0, buffer.Length);
-        Console.WriteLine("Received Bytes: " + BitConverter.ToString(buffer));
+        //Console.WriteLine("Received Bytes: " + BitConverter.ToString(buffer));
         if (bytesRead > 0)
         {
             Console.WriteLine(bytesRead.ToString());
@@ -299,7 +347,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private async Task SendOutputTransmiter(int lightNumber, bool state)
     {
-        //01 0B 00 06 00 02 0A 12 1A 0D 03
         byte[] frame = new byte[3];
         frame[0] = 0x06;
         frame[1] = 0x00;
@@ -314,11 +361,11 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         frame[2] = byteValue;
         Console.WriteLine("Frame"+ lightNumber+";"+state+" Light Control Bytes: " + BitConverter.ToString(frame)); 
         await SendFrame(frame);
+
     }
 
     private async Task SendOutputReceived(int lightNumber, bool state)
     {
-        //01 0B 00 06 00 02 0A 12 1A 0D 03
         byte[] frame = new byte[2];
         frame[0] = 0x05;
 
@@ -332,30 +379,41 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         frame[1] = byteValue;
         Console.WriteLine("Frame" + lightNumber + ";" + state + " Light Control Bytes: " + BitConverter.ToString(frame));
         await SendFrame(frame);
+
     }
 
+    public async void SendUpdateStatus()
+    {
+        byte[] frame = new byte[1];
+        frame[0] = 0x01;
+        await SendFrame(frame);
+    }
+
+    
     public async Task SendByte(byte[] data)
     {
         await Task.Delay(100);
         serialPort.Write(data, 0, data.Length);
     }
 
-
+    private object a = new object();
+    private readonly Mutex _mutex = new Mutex();
     public async Task SendFrame(byte[] data)
     {
-        await Task.Delay(100);
+        byte[] dataSend = new byte[data.Length + 5];
+
         if (_indexSend == 255) _indexSend = 0;
         _indexSend++;
-
-        byte[] dataSend = new byte[data.Length+5];
         dataSend[0] = 0x01;
         dataSend[1] = (byte)dataSend.Length;
         dataSend[2] = (byte)_indexSend;
-        Array.Copy(data,0,dataSend,3,data.Length);
-        dataSend[dataSend.Length-1] = 0x03;
-        dataSend[dataSend.Length-2] = GetCRC(dataSend);
+        Array.Copy(data, 0, dataSend, 3, data.Length);
+        dataSend[dataSend.Length - 1] = 0x03;
+        dataSend[dataSend.Length - 2] = GetCRC(dataSend);
         Console.WriteLine("Send Bytes: " + BitConverter.ToString(dataSend));
+       
         await SendByte(dataSend);
+
     }
 
     #endregion
