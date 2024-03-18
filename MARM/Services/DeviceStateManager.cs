@@ -237,7 +237,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         {
             _isDataSendReceived = false;
             Console.WriteLine("vao day");
-            SendUpdateStatus();
         }    
             
     }
@@ -378,6 +377,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private async Task SendOutputTransmiter(int lightNumber, bool state)
     {
+        if(!listening) return;
         _isDataSendReceived = true;
         byte[] frame = new byte[3];
         frame[0] = 0x06;
@@ -399,6 +399,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private async Task SendOutputReceived(int lightNumber, bool state)
     {
+        if(!listening) return;
         byte[] frame = new byte[2];
         frame[0] = 0x05;
 
@@ -417,6 +418,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public async void SendUpdateStatus()
     {
+        if(!listening) return;
         byte[] frame = new byte[1];
         frame[0] = 0x01;
         await SendFrame(frame);
@@ -445,33 +447,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         await SendByte(dataSend);
 
     }
-
-    //public async Task SendFrame(byte[] data)
-    //{
-    //    if (_indexSend == 255) _indexSend = 0;
-    //    _indexSend++;
-
-    //    byte[] dataGetStatus = new byte[] { 0x01, 0x00, (byte)_indexSend, 0x01, 0x00, 0x03};
-    //    dataGetStatus[1] = (byte)dataGetStatus.Length;
-    //    dataGetStatus[dataGetStatus.Length - 2] = (byte)GetCRC(dataGetStatus);
-    //    Console.WriteLine("Send Command Get Status Bytes: " + BitConverter.ToString(dataGetStatus));
-
-    //    byte[] dataSend = new byte[data.Length + 5];
-    //    if (_indexSend == 255) _indexSend = 0;
-    //    _indexSend++;
-    //    dataSend[0] = 0x01;
-    //    dataSend[1] = (byte)dataSend.Length;
-    //    dataSend[2] = (byte)_indexSend;
-    //    Array.Copy(data, 0, dataSend, 3, data.Length);
-    //    dataSend[dataSend.Length - 1] = 0x03;
-    //    dataSend[dataSend.Length - 2] = GetCRC(dataSend);
-    //    Console.WriteLine("Send Bytes: " + BitConverter.ToString(dataSend));
-
-    //    byte[] mergedArray = dataGetStatus.Concat(dataSend).ToArray();
-    //    Console.WriteLine("Send Bytes: " + BitConverter.ToString(mergedArray));
-    //    await SendByte(mergedArray);
-
-    //}
 
     #endregion
     #region NextPage
