@@ -69,6 +69,7 @@
 
 @code {
     private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
+    private List<int> outputPin = new List<int> { 4, 3, 2, 1 };
     private int currentLinkIndex = 0;
 
     protected override void OnInitialized()
@@ -79,8 +80,9 @@
         if (comService.IsConnected())
         {
             pageNavi.NavigateTo(0);
+            dataSender.RemoteUpdateStatus();
         }
-        
+
         else
             pageNavi.NavigateTo(1);
     }
@@ -90,7 +92,6 @@
         _ = InvokeAsync(() =>
         {
             NavigateToLink(navLinks[pageIndex]);
-            
             StateHasChanged();
         });
     }

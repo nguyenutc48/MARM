@@ -22,7 +22,7 @@ namespace MARM.Services
 
         private void _comDataService_DataReceived(byte[] buffer)
         {
-            byte[] dataReceived = CheckFrameSend(buffer);
+            byte[] dataReceived = ReceivedFrame(buffer);
             if (dataReceived.Length != 0 && dataReceived != null)
             {
                 var commandType = dataReceived[3];
@@ -33,8 +33,11 @@ namespace MARM.Services
                         break;
                     case (byte)CommandType.RemoteStateCallback:
                         // Get data from frame
-                        byte[] dataState = { dataReceived[4], dataReceived[5], dataReceived[6] };
-                        OnRemoteStateReceived(dataState);
+                        if (dataReceived.Length == 9)
+                        {
+                            byte[] dataState = { dataReceived[4], dataReceived[5], dataReceived[6] };
+                            OnRemoteStateReceived(dataState);
+                        }
                         break;
                     case (byte)CommandType.RemoteShotCallback:
                         // Get data from frame
@@ -89,7 +92,7 @@ namespace MARM.Services
             byteValue >>= 1;
 
             frame[1] = byteValue;
-            Console.WriteLine("Light control: " + BitConverter.ToString(frame));
+            //Console.WriteLine("Light control: " + BitConverter.ToString(frame));
             await SendFrame(frame);
         }
 
@@ -109,7 +112,7 @@ namespace MARM.Services
             byteValue >>= 1;
 
             frame[2] = byteValue;
-            Console.WriteLine("Remote light control: " + BitConverter.ToString(frame));
+            //Console.WriteLine("Remote light control: " + BitConverter.ToString(frame));
             await SendFrame(frame);
         }
 
@@ -133,7 +136,7 @@ namespace MARM.Services
             Array.Copy(data, 0, dataSend, 3, data.Length);
             dataSend[dataSend.Length - 1] = 0x03;
             dataSend[dataSend.Length - 2] = GetCRC(dataSend);
-            Console.WriteLine("Send data frame: " + BitConverter.ToString(dataSend));
+            Console.WriteLine("Frame Send: " + BitConverter.ToString(dataSend));
 
             await _comDataService.SendByte(dataSend);
         }
@@ -159,9 +162,9 @@ namespace MARM.Services
             else return false;
         }
 
-        private byte[] CheckFrameSend(byte[] buffer)
+        private byte[] ReceivedFrame(byte[] buffer)
         {
-            int startFrameIndex = Array.IndexOf(buffer, (byte)0x01);
+            int startFrameIndex = Array.IndexOf(buffer, (byte)0x02);
             int endFrameIndex = Array.IndexOf(buffer, (byte)0x03);
             if (startFrameIndex >= 0 && endFrameIndex >= 0)
             {
@@ -169,14 +172,14 @@ namespace MARM.Services
 
                 Array.Copy(buffer, startFrameIndex, receivedFrame, 0, endFrameIndex - startFrameIndex + 1);
 
-                Console.WriteLine("Received data frame: " + BitConverter.ToString(receivedFrame));
+                Console.WriteLine("Frame Received: " + BitConverter.ToString(receivedFrame));
                 if (CheckCRC(receivedFrame))
                     return receivedFrame;
                 else return Array.Empty<byte>();
             }
             else
             {
-                Console.WriteLine("Frame received not found");
+                Console.WriteLine("Frame in received data was not found");
                 return Array.Empty<byte>();
             }
         }

@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Pages\ComPortSetting.razor" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="ElectronNET.API" Version="23.6.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.12">
       <PrivateAssets>all</PrivateAssets>

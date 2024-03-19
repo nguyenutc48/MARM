@@ -39,7 +39,7 @@ namespace MARM.Services
             {
                 var dataReceiveds = new byte[byteReceivedLength];
                 Array.Copy(buffer, dataReceiveds, byteReceivedLength);
-                Console.WriteLine($"Data received: {dataReceiveds}");
+                Console.WriteLine($"Data received: {BitConverter.ToString(dataReceiveds)}");
                 OnDataReceived(dataReceiveds);
             }
         }
@@ -63,15 +63,9 @@ namespace MARM.Services
             }
         }
 
-        public async Task SendData(string data)
-        {
-            await Task.Yield();
-            serialPort.WriteLine(data);
-        }
-
         public async Task<byte[]> ReadData()
         {
-            await Task.Yield();
+            await Task.Delay(100);
             byte[] data = new byte[255];
             if(isOpened)
             {
@@ -93,7 +87,7 @@ namespace MARM.Services
 
         public async Task SendByte(byte[] data)
         {
-            await Task.Yield();
+            await Task.Delay(100);
             serialPort.Write(data, 0, data.Length);
         }
     }

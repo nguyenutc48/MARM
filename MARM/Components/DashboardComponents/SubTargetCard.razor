@@ -38,12 +38,13 @@
 
 
 @code {
-    private TargetConnectState ConnectState { get; set; } = TargetConnectState.Lost;
+    private TargetConnectState ConnectState { get; set; };
     private string Style => ConnectState == TargetConnectState.Lost ? "background-color: rgba(234, 124, 49, 0.1)" : "background-color: rgba(6, 165, 224, 0.1)";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        ConnectState = TargetConnectManager.SubTargetConnectState;
         TargetConnectManager.SubTargetConnectStateChanged += OnValueChanged;
     }
 
@@ -51,6 +52,7 @@
     {
         _ = InvokeAsync(() =>
         {
+            if (ConnectState == state) return;
             ConnectState = state;
             StateHasChanged();
         });

@@ -44,6 +44,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        ConnectState = TargetConnectManager.MainTargetConnectState;
         TargetConnectManager.MainTargetConnectStateChanged += OnValueChanged;
     }
 
@@ -51,6 +52,7 @@
     {
         _ = InvokeAsync(() =>
         {
+            if (ConnectState == state) return;
             ConnectState = state;
             StateHasChanged();
         });

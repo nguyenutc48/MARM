@@ -50,13 +50,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private void _dataSendService_ButtonReceived(byte buttonAddress)
     {
-        if (buttonAddress == (byte)ButtonMode.Home) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Home));
-        if (buttonAddress == (byte)ButtonMode.Setting) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Setting));
-        if (buttonAddress == (byte)ButtonMode.Data) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Data));
-        if (buttonAddress == (byte)ButtonMode.ShotResult) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.ShotResult));
+        if (buttonAddress == (byte)ButtonMode.Home) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Home));
+        if (buttonAddress == (byte)ButtonMode.Setting) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Setting));
+        if (buttonAddress == (byte)ButtonMode.Data) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Data));
+        if (buttonAddress == (byte)ButtonMode.ShotResult) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.ShotResult));
         if (buttonAddress == (byte)ButtonMode.PrevPage) NavigateForward();
         if (buttonAddress == (byte)ButtonMode.BackPage) NavigateBack();
-
     }
 
     private void _dataSendService_RemoteStateReceived(byte[] data)
@@ -170,6 +169,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     private List<int> pageLightCode = new List<int> { 4,3,2,1};
     public async void NavigateTo(int pageIndex)
     {
+        await Task.Yield();
+
         if (pageIndex < 0 || pageIndex > TotalPage) _pageIndex = 0;
         else _pageIndex = pageIndex;
         PageChanged?.Invoke(_pageIndex);
@@ -184,6 +185,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public async void NavigateBack()
     {
+        await Task.Yield();
+
         if (_pageIndex == 0)
         {
             _pageIndex = TotalPage - 1; 
@@ -205,6 +208,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public async void NavigateForward()
     {
+        await Task.Yield();
+
         _pageIndex = (_pageIndex + 1) % TotalPage;
         PageChanged?.Invoke(_pageIndex);
         for (int i = 0; i < pageLightCode.Count; i++)
