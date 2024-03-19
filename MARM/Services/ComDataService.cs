@@ -53,9 +53,13 @@ namespace MARM.Services
         {
             try
             {
-                serialPort.DataReceived -= SerialPort_DataReceived;
-                serialPort.Close();
-                isOpened = false;
+                if (serialPort != null)
+                {
+                    serialPort.DataReceived -= SerialPort_DataReceived;
+                    serialPort.Close();
+                    isOpened = false;
+                }
+                else { Console.WriteLine("Serial port is null"); }
             }
             catch (Exception ex)
             {
@@ -67,14 +71,17 @@ namespace MARM.Services
         {
             await Task.Delay(100);
             byte[] data = new byte[255];
-            if(isOpened)
+            if(serialPort != null)
             {
-                int lengthAvailble = serialPort.Read(data, 0, data.Length);  
-                if (lengthAvailble > 0)
+                if (isOpened)
                 {
-                    var dataAvailble = new byte[lengthAvailble];
-                    Array.Copy(data, dataAvailble, dataAvailble.Length);
-                    return dataAvailble;
+                    int lengthAvailble = serialPort.Read(data, 0, data.Length);
+                    if (lengthAvailble > 0)
+                    {
+                        var dataAvailble = new byte[lengthAvailble];
+                        Array.Copy(data, dataAvailble, dataAvailble.Length);
+                        return dataAvailble;
+                    }
                 }
             }
             return Array.Empty<byte>();
@@ -82,13 +89,20 @@ namespace MARM.Services
 
         public bool IsConnected()
         {
-            return serialPort.IsOpen;
+            return serialPort!=null?serialPort.IsOpen:false;
         }
 
         public async Task SendByte(byte[] data)
         {
             await Task.Delay(100);
-            serialPort.Write(data, 0, data.Length);
+            if (serialPort != null)
+            {
+                if(isOpened)
+                {
+                    serialPort.Write(data, 0, data.Length);
+                }
+                
+            }
         }
     }
 }
