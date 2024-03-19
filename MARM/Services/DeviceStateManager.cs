@@ -1,4 +1,5 @@
-﻿using MARM.Enums;
+﻿using ElectronNET.API.Entities;
+using MARM.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
@@ -26,8 +27,9 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public event Action<int>? PageChanged;
     public int TotalPage { get; set; }
 
-    private Dictionary<int, int> _pageNames = new Dictionary<int, int> { { (int)ButtonMode.Home, 0 }, { (int)ButtonMode.Setting, 1 }, { (int)ButtonMode.Data, 2 }, { (int)ButtonMode.ShotResult, 3 } };
-
+    //private Dictionary<int, int> _pageNames = new Dictionary<int, int> { { (int)ButtonMode.Home, 0 }, { (int)ButtonMode.Setting, 1 }, { (int)ButtonMode.Data, 2 }, { (int)ButtonMode.ShotResult, 3 } };
+    private byte[] _pageNameIndexs = { (byte)ButtonMode.Home, (byte)ButtonMode.Setting, (byte)ButtonMode.Data , (byte)ButtonMode.ShotResult };
+    
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
     public bool Light3 { get; private set; }
@@ -37,11 +39,40 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public DeviceStateManager(DataSendService dataSendService)
     {
         _dataSendService = dataSendService;
+        _dataSendService.RemoteStateReceived += _dataSendService_RemoteStateReceived;
+        _dataSendService.ButtonReceived += _dataSendService_ButtonReceived;
         MainTargetConnectState = TargetConnectState.Lost;
         SubTargetConnectState = TargetConnectState.Lost;
         BatteryLevel1 = 50;
         BatteryLevel2 = 50;
         _pageIndex = 0;
+    }
+
+    private void _dataSendService_ButtonReceived(byte buttonAddress)
+    {
+        if (buttonAddress == (byte)ButtonMode.Home) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Home));
+        if (buttonAddress == (byte)ButtonMode.Setting) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Setting));
+        if (buttonAddress == (byte)ButtonMode.Data) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.Data));
+        if (buttonAddress == (byte)ButtonMode.ShotResult) NavigateTo(Array.IndexOf(_pageNameIndexs, ButtonMode.ShotResult));
+        if (buttonAddress == (byte)ButtonMode.PrevPage) NavigateForward();
+        if (buttonAddress == (byte)ButtonMode.BackPage) NavigateBack();
+
+    }
+
+    private void _dataSendService_RemoteStateReceived(byte[] data)
+    {
+        if (data[0] == (byte)RemoteAddress.Main)
+        {
+            SetBattery((int)RemoteAddress.Main, (int)data[1]);
+            if (data[2] == 0xFF) SetMainTargetConnectState(TargetConnectState.Good);
+            else SetMainTargetConnectState(TargetConnectState.Lost);
+        }
+        if (data[0] == (byte)RemoteAddress.Sub)
+        {
+            SetBattery((int)RemoteAddress.Sub, (int)data[1]);
+            if (data[2] == 0xFF) SetSubTargetConnectState(TargetConnectState.Good);
+            else SetSubTargetConnectState(TargetConnectState.Lost);
+        }
     }
 
     public void SetMainTargetConnectState(TargetConnectState targetConnectState)
@@ -116,7 +147,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public void SetBattery(int batteryNumber, int level)
     {
-        if(batteryNumber == 1)
+        if(batteryNumber == 0)
         {
             if(level != BatteryLevel1)
             {
@@ -124,7 +155,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                 BatteryLevelChanged?.Invoke(BatteryLevel1, BatteryLevel2);
             }
         }
-        if (batteryNumber == 2)
+        if (batteryNumber == 1)
         {
             if (level != BatteryLevel2)
             {

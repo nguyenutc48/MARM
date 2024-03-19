@@ -5,10 +5,13 @@ namespace MARM.Services
     {
         private readonly ComDataService _comDataService;
         private int _indexSend;
+        private bool _isSend = false;
+        public bool IsSend {  get { return _isSend; } set { if(value!=_isSend) _isSend = value; } }
 
         public event Action<byte>? ButtonReceived;
         public event Action<byte[]>? RemoteStateReceived;
         public event Action<byte[]>? ShotStateReceived;
+        public event Action<byte[]>? LeakStateReceived;
 
 
         public DataSendService(ComDataService comDataService)
@@ -25,12 +28,29 @@ namespace MARM.Services
                 var commandType = dataReceived[3];
                 switch (commandType)
                 {
-                    case (byte)CallbackType.ButtonCallback:
+                    case (byte)CommandType.ButtonCallback:
                         OnButtonReceived(dataReceived[4]);
+                        break;
+                    case (byte)CommandType.RemoteStateCallback:
+                        // Get data from frame
+                        byte[] dataState = { dataReceived[4], dataReceived[5], dataReceived[6] };
+                        OnRemoteStateReceived(dataState);
+                        break;
+                    case (byte)CommandType.RemoteShotCallback:
+                        // Get data from frame
+                        byte[] dataShot = { dataReceived[4], dataReceived[5] };
+                        OnShotStateReceived(dataShot);
+                        break;
+                    case (byte)CommandType.RemoteLeakCallback:
+                        // Get data from frame
+                        byte[] dataLeak = { dataReceived[4], dataReceived[5] };
+                        OnShotStateReceived(dataLeak);
+                        OnLeakStateReceived(dataReceived);
                         break;
                     default:
                         break;
                 }
+                _isSend = false;
             }
         }
 
@@ -39,8 +59,24 @@ namespace MARM.Services
             ButtonReceived?.Invoke(data);
         }
 
+        protected virtual void OnRemoteStateReceived(byte[] data)
+        {
+            RemoteStateReceived?.Invoke(data);
+        }
+
+        protected virtual void OnShotStateReceived(byte[] data)
+        {
+            ShotStateReceived?.Invoke(data);
+        }
+
+        protected virtual void OnLeakStateReceived(byte[] data)
+        {
+            LeakStateReceived?.Invoke(data);
+        }
+
         public async Task LightControl(int lightNumber, bool state)
         {
+            _isSend = true;
             if (!_comDataService.IsConnected()) return;
             byte[] frame = new byte[2];
             frame[0] = 0x05;
@@ -59,6 +95,7 @@ namespace MARM.Services
 
         public async Task RemoteLightControl(int lightNumber, bool state)
         {
+            _isSend = true;
             if (!_comDataService.IsConnected()) return;
             byte[] frame = new byte[3];
             frame[0] = 0x06;
@@ -78,6 +115,7 @@ namespace MARM.Services
 
         public async Task RemoteUpdateStatus()
         {
+            _isSend = true;
             if (!_comDataService.IsConnected()) return;
             byte[] frame = new byte[1];
             frame[0] = 0x01;

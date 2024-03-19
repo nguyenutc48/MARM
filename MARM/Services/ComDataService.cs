@@ -36,8 +36,12 @@ namespace MARM.Services
             SerialPort sp = (SerialPort)sender;
             int byteReceivedLength = sp.Read(buffer,0,buffer.Length);
             if(byteReceivedLength > 0)
-                OnDataReceived(buffer);
-
+            {
+                var dataReceiveds = new byte[byteReceivedLength];
+                Array.Copy(buffer, dataReceiveds, byteReceivedLength);
+                Console.WriteLine($"Data received: {dataReceiveds}");
+                OnDataReceived(dataReceiveds);
+            }
         }
 
         protected virtual void OnDataReceived(byte[] data)
@@ -61,7 +65,7 @@ namespace MARM.Services
 
         public async Task SendData(string data)
         {
-            await Task.Delay(100);
+            await Task.Yield();
             serialPort.WriteLine(data);
         }
 
@@ -71,11 +75,12 @@ namespace MARM.Services
             byte[] data = new byte[255];
             if(isOpened)
             {
-                int a = serialPort.Read(data, 0, data.Length);  
-                if (a > 0)
+                int lengthAvailble = serialPort.Read(data, 0, data.Length);  
+                if (lengthAvailble > 0)
                 {
-                    data = new byte[a];
-                    return data;
+                    var dataAvailble = new byte[lengthAvailble];
+                    Array.Copy(data, dataAvailble, dataAvailble.Length);
+                    return dataAvailble;
                 }
             }
             return Array.Empty<byte>();

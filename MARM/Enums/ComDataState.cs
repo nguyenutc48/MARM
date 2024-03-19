@@ -1,11 +1,22 @@
 ﻿namespace MARM.Enums
 {
-    public enum CallbackType : int
+    public enum RemoteAddress : byte
     {
-        ButtonCallback = 0x04,
-        RemoteStateCallback = 0x01
+        Main = 0x00,
+        Sub = 0x01,
     }
-    public enum ButtonMode : int
+    public enum CommandType : byte
+    {
+        
+        RemoteStateCallback = 0x01,
+        RemoteShotCallback = 0x02,
+        RemoteLeakCallback = 0x03,
+        ButtonCallback = 0x04,
+        Output = 0x05,
+        RemoteOutput = 0x06,
+
+    }
+    public enum ButtonMode : byte
     {
         ErrorConfirm = 0x00,
         Shot = 0x01,
