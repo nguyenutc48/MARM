@@ -4,8 +4,8 @@
 
 <PageTitle>Connection Setting</PageTitle>
 
-@inject NavigationManager naviManager
-@inject DeviceStateManager deviceManager
+@inject IPageNavigationService naviManager
+@inject IComDataService comService
 
 <MudContainer>
     <MudPaper Class="m-3 p-3">
@@ -37,12 +37,12 @@
     private void Connect()
     {
         // Thực hiện kết nối với COM Port
-        deviceManager.Open(comPort, baudRate);
+        comService.Open(comPort, baudRate);
 
-        if (deviceManager.IsConnected())
+        if (comService.IsConnected())
         {
             // Nếu kết nối thành công, chuyển hướng về dashboard
-            naviManager.NavigateTo("/dashboard");
+            naviManager.NavigateTo(0);
         }
         else
         {

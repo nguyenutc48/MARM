@@ -16,13 +16,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlite($"Data Source=database.db");
 });
-
+builder.Services.AddSingleton<ComDataService>();
+builder.Services.AddSingleton<DataSendService>();
+builder.Services.AddSingleton<IComDataService>(sp => sp.GetRequiredService<ComDataService>());
+builder.Services.AddSingleton<IDataSendService>(sp => sp.GetRequiredService<DataSendService>());
 builder.Services.AddSingleton<DeviceStateManager>();
 builder.Services.AddSingleton<ITargetConnectStateManager>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ILightController>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ITransmitterDeviceManager>(sp => sp.GetRequiredService<DeviceStateManager>());
-builder.Services.AddSingleton<IComDataService>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<IPageNavigationService>(sp => sp.GetRequiredService<DeviceStateManager>());
+
 
 builder.Services.AddSingleton<MissionManager>();
 

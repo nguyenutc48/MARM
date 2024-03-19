@@ -6,7 +6,7 @@
 
 <PageTitle>Setting</PageTitle>
 
-@inject DeviceStateManager deviceManager
+@inject IComDataService comService
 
 <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex flex-row justify-content-between">
@@ -261,7 +261,7 @@
 
     private void ConnectClick()
     {
-        deviceManager.Open(Port, Baudrate);
+        comService.Open(Port, Baudrate);
     }
 
 

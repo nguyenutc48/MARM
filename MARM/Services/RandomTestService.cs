@@ -4,7 +4,9 @@ namespace MARM.Services;
 
 public class RandomTestService : IHostedService
 {
-    private readonly DeviceStateManager deviceStateManager;
+    private readonly DeviceStateManager _deviceStateManager;
+    private readonly DataSendService _dataSendService;
+    private readonly ComDataService _comDataService;
     private readonly System.Timers.Timer _timer = new()
     {
         Interval = 5000,
@@ -14,11 +16,12 @@ public class RandomTestService : IHostedService
     private readonly Random random = new();
     private readonly Array TargetConnectStateValues = Enum.GetValues(typeof(TargetConnectState));
 
-    public RandomTestService(DeviceStateManager _deviceStateManager)
+    public RandomTestService(DeviceStateManager deviceStateManager, DataSendService dataSendService, ComDataService comDataService)
     {
-        deviceStateManager = _deviceStateManager;
+        _deviceStateManager = deviceStateManager;
+        _dataSendService = dataSendService;
+        _comDataService = comDataService;
         
-
         _timer.Elapsed += _timer_Elapsed;
     }
 
@@ -33,7 +36,7 @@ public class RandomTestService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _timer.Start();
-        deviceStateManager.Open("COM16", 57600);
+        _comDataService.Open("COM16", 57600);
 
         return Task.CompletedTask;
     }

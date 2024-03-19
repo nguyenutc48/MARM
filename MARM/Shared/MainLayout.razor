@@ -4,7 +4,7 @@
 
 @inject NavigationManager  naviManger
 @inject IPageNavigationService pageNavi
-@inject DeviceStateManager deviceManager
+@inject IComDataService comService
 
 <PageTitle>MARM</PageTitle>
 
@@ -74,10 +74,9 @@
         base.OnInitialized();
         pageNavi.PageChanged += HandlePageChanged;
         pageNavi.TotalPage = 4;
-        if (deviceManager.IsConnected())
+        if (comService.IsConnected())
         {
-            pageNavi.NavigateTo(0); 
-            deviceManager.SendUpdateStatus();
+            pageNavi.NavigateTo(0);
         }
         
         else
