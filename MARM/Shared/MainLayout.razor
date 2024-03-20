@@ -91,7 +91,7 @@
         _ = InvokeAsync(() =>
         {
             NavigateToLink(navLinks[pageIndex]);
-            if(pageIndex == 0) dataSender.RemoteUpdateStatus();
+            // if(pageIndex == 0) dataSender.RemoteUpdateStatus();
             StateHasChanged();
         });
     }

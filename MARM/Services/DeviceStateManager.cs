@@ -181,6 +181,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
+        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
 
     public async void NavigateBack()
@@ -203,7 +204,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
-
+        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
 
     public async void NavigateForward()
@@ -219,7 +220,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
-
+        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
     #endregion
 }
