@@ -4,6 +4,8 @@
     {
         Main = 0x00,
         Sub = 0x01,
+        Main1 = 0x02,
+        Sub1 = 0x03,
     }
     public enum CommandType : byte
     {

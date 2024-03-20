@@ -1,13 +1,16 @@
-﻿@page "/checklist"
+﻿@using MARM.Services
+@using MARM.Enums
+@page "/checklist"
 
 <PageTitle>Check list</PageTitle>
+@inject IDataSendService dataSender
 
 <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex flex-row justify-content-between align-items-center">
         <MudText Typo="Typo.h4">
             Kiểm tra, thông báo tình trạng các ô của mặt chắn đạn
         </MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary">Kiểm tra</MudButton>
+        <MudButton @onclick="CheckClick" Variant="Variant.Filled" Color="Color.Primary">Kiểm tra</MudButton>
         <img src="images/Picture2.png" class="me-10" height="100" alt="device" />
     </div>
     <div class="flex-grow-1 w-100 position-relative overflow-hidden">
@@ -95,58 +98,72 @@
     </div>
 </div>
 
-@code {
+    @code {
     public class ChecklistDataModel
     {
         public int Id { get; set; }
         public string State { get; set; } = "";
+        public string Status { get; set; } = "";
     }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        dataSender.RemoteStateReceived += HandleStateReceived;
+    }
+
+    private void HandleStateReceived(byte[] data)
+    {
+        var remoteAddress = data[0];
+        if(remoteAddress == (byte)RemoteAddress.Main)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                byte mask = (byte)(1 << i); // Tạo mask với bit 1 tại vị trí i
+                var matchinh = MatHungDanChinh.FirstOrDefault(c => c.Id == i);
+                if ((data[2] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
+                {
+                    matchinh.State = "Bị Chập";
+                    if(matchinh != null) matchinh.Status = "Bị Chập";
+                }
+                else
+                {
+                    var matchinh = MatHungDanChinh.FirstOrDefault(c => c.Id == i);
+
+                    if (matchinh != null) matchinh.Status = "Bình Thường";
+                }
+            }
+        }
+
+    }
+
 
     private List<ChecklistDataModel> MatHungDanChinh = new()
     {
-        new ChecklistDataModel{ Id = 1, State = "Tốt"},
-        new ChecklistDataModel{ Id = 2, State = "Tốt"},
-        new ChecklistDataModel{ Id = 3, State = "Tốt"},
-        new ChecklistDataModel{ Id = 4, State = "Tốt"},
-        new ChecklistDataModel{ Id = 5, State = "Tốt"},
-        new ChecklistDataModel{ Id = 6, State = "Tốt"},
-        new ChecklistDataModel{ Id = 7, State = "Tốt"},
-        new ChecklistDataModel{ Id = 8, State = "Tốt"},
+        new ChecklistDataModel{ Id = 1, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 2, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 3, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 4, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 5, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 6, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 7, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 8, State = "Tốt", Status = "Bình Thường" },
     };
 
     private List<ChecklistDataModel> MatHungDanPhu = new()
     {
-        new ChecklistDataModel{ Id = 9, State = "Tốt"},
-        new ChecklistDataModel{ Id = 10, State = "Tốt"},
-        new ChecklistDataModel{ Id = 11, State = "Tốt"},
-        new ChecklistDataModel{ Id = 12, State = "Tốt"},
-        new ChecklistDataModel{ Id = 13, State = "Tốt"},
-        new ChecklistDataModel{ Id = 14, State = "Tốt"},
-        new ChecklistDataModel{ Id = 15, State = "Tốt"},
-        new ChecklistDataModel{ Id = 16, State = "Tốt"},
+        new ChecklistDataModel{ Id = 9, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 10, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 11, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 12, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 13, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 14, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 15, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 16, State = "Tốt", Status = "Bình Thường" },
     };
 
-    private List<ChecklistDataModel> MatChanDanChinh = new()
+    private void CheckClick()
     {
-        new ChecklistDataModel{ Id = 1, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 2, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 3, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 4, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 5, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 6, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 7, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 8, State = "Bình thường"},
-    };
-
-    private List<ChecklistDataModel> MatChanDanPhu = new()
-    {
-        new ChecklistDataModel{ Id = 9, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 10, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 11, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 12, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 13, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 14, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 15, State = "Bình thường"},
-        new ChecklistDataModel{ Id = 16, State = "Bị chập"},
-    };
+        dataSender.RemoteUpdateStatus();
+    }
 }

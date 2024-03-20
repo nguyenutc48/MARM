@@ -7,6 +7,7 @@
 <PageTitle>Setting</PageTitle>
 
 @inject IComDataService comService
+@inject IDataSendService dataSender
 
 <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex flex-row justify-content-between">
@@ -186,7 +187,13 @@
     private bool IsExpanded0 { get; set; } = true;
     private bool IsExpanded1 { get; set; } = true;
     private bool IsExpanded2 { get; set; } = true;
-    private bool IsExpanded3 { get; set; } = true;
+    private bool IsExpanded3 { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (!comService.IsConnected()) IsExpanded3 = true;
+    }
 
     private void EnableEditTransmit()
     {
