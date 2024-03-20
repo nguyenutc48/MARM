@@ -103,63 +103,179 @@
     {
         public int Id { get; set; }
         public string State { get; set; } = "";
-        public string Status { get; set; } = "";
     }
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         dataSender.RemoteStateReceived += HandleStateReceived;
+        dataSender.LeakStateReceived += HandleLeakStateReceived;
     }
 
     private void HandleStateReceived(byte[] data)
     {
-        var remoteAddress = data[0];
-        if(remoteAddress == (byte)RemoteAddress.Main)
+        _ = InvokeAsync(() =>
         {
-            for (int i = 0; i < 8; i++)
+            var remoteAddress = data[0];
+            switch (remoteAddress)
             {
-                byte mask = (byte)(1 << i); // Tạo mask với bit 1 tại vị trí i
-                var matchinh = MatHungDanChinh.FirstOrDefault(c => c.Id == i);
-                if ((data[2] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
-                {
-                    matchinh.State = "Bị Chập";
-                    if(matchinh != null) matchinh.Status = "Bị Chập";
-                }
-                else
-                {
-                    var matchinh = MatHungDanChinh.FirstOrDefault(c => c.Id == i);
+                case (byte)RemoteAddress.Main:
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            // Tạo mask với bit 1 tại vị trí i
+                            var matChanChinh = MatHungDanChinh.FirstOrDefault(c => c.Id == (i + 1));
+                            if (matChanChinh != null)
+                            {
+                                byte mask = (byte)(1 << i);
+                                if ((data[2] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
+                                {
+                                    matChanChinh.State = "Bị chập";
+                                }
+                                else
+                                {
+                                    matChanChinh.State = "Tốt";
+                                }
+                            }
 
-                    if (matchinh != null) matchinh.Status = "Bình Thường";
-                }
+                        }
+                    }
+                    break;
+                case (byte)RemoteAddress.Sub:
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            byte mask = (byte)(1 << i); // Tạo mask với bit 1 tại vị trí i
+                            var matChanPhu = MatHungDanPhu.FirstOrDefault(c => c.Id == (i + 9));
+                            if (matChanPhu != null)
+                            {
+                                if ((data[2] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
+                                {
+                                    matChanPhu.State = "Bị chập";
+                                }
+                                else
+                                {
+                                    matChanPhu.State = "Tốt";
+                                }
+
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+
             }
-        }
+            StateHasChanged();
+        });
+    }
 
+    private void HandleLeakStateReceived(byte[] data)
+    {
+        _ = InvokeAsync(() =>
+        {
+            var remoteAddress = data[0];
+            switch(remoteAddress)
+            {
+                case (byte)RemoteAddress.Main:
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            // Tạo mask với bit 1 tại vị trí i
+                            var matChanChinh = MatChanDanChinh.FirstOrDefault(c => c.Id == (i+1));
+                            if(matChanChinh != null)
+                            {
+                                byte mask = (byte)(1 << i);
+                                if ((data[1] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
+                                {
+                                    matChanChinh.State = "Bị chập";
+                                }
+                                else
+                                {
+                                    matChanChinh.State = "Bình thường";
+                                }
+
+                            }
+                        
+                        }
+                    }
+                    break;
+                case (byte)RemoteAddress.Sub:
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            byte mask = (byte)(1 << i); // Tạo mask với bit 1 tại vị trí i
+                            var matChanPhu = MatChanDanPhu.FirstOrDefault(c => c.Id == (i + 9));
+                            if (matChanPhu != null)
+                            {
+                                if ((data[1] & mask) == 0) // Kiểm tra bit tại vị trí i có phải là 0 không
+                                {
+                                    matChanPhu.State = "Bị chập";
+                                }
+                                else
+                                {
+                                    matChanPhu.State = "Bình thường";
+                                }
+
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+             
+            }
+            StateHasChanged();
+        });
     }
 
 
     private List<ChecklistDataModel> MatHungDanChinh = new()
     {
-        new ChecklistDataModel{ Id = 1, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 2, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 3, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 4, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 5, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 6, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 7, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 8, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 1, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 2, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 3, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 4, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 5, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 6, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 7, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 8, State = "Không hoạt động"},
     };
 
     private List<ChecklistDataModel> MatHungDanPhu = new()
     {
-        new ChecklistDataModel{ Id = 9, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 10, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 11, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 12, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 13, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 14, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 15, State = "Tốt", Status = "Bình Thường" },
-        new ChecklistDataModel{ Id = 16, State = "Tốt", Status = "Bình Thường" },
+        new ChecklistDataModel{ Id = 9, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 10, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 11, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 12, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 13, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 14, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 15, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 16, State = "Không hoạt động"},
+    };
+
+    private List<ChecklistDataModel> MatChanDanChinh = new()
+    {
+        new ChecklistDataModel{ Id = 1, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 2, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 3, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 4, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 5, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 6, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 7, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 8, State = "Không hoạt động"},
+    };
+
+    private List<ChecklistDataModel> MatChanDanPhu = new()
+    {
+        new ChecklistDataModel{ Id = 9, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 10, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 11, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 12, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 13, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 14, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 15, State = "Không hoạt động"},
+        new ChecklistDataModel{ Id = 16, State = "Không hoạt động"},
     };
 
     private void CheckClick()

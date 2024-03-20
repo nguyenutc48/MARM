@@ -21,8 +21,9 @@ namespace MARM.Services
         }
 
         private void _comDataService_DataReceived(byte[] buffer)
-        {
-            byte[] dataReceived = ReceivedFrame(buffer);
+        { 
+            if(buffer.Length<6) return;
+            byte[] dataReceived = buffer;// ReceivedFrame(buffer);
             if (dataReceived.Length != 0 && dataReceived != null)
             {
                 var commandType = dataReceived[3];
@@ -47,8 +48,7 @@ namespace MARM.Services
                     case (byte)CommandType.RemoteLeakCallback:
                         // Get data from frame
                         byte[] dataLeak = { dataReceived[4], dataReceived[5] };
-                        OnShotStateReceived(dataLeak);
-                        OnLeakStateReceived(dataReceived);
+                        OnLeakStateReceived(dataLeak);
                         break;
                     default:
                         break;
@@ -108,6 +108,26 @@ namespace MARM.Services
             byteValue |= (byte)(lightNumber << 4); // Dịch số 3 vào 4 bit cao
             if (state == true) byteValue |= (byte)(1 << 2);  // Dịch số 1 vào 4 bit thấp
             else byteValue |= (byte)(0 << 2);
+
+            byteValue >>= 1;
+
+            frame[2] = byteValue;
+            //Console.WriteLine("Remote light control: " + BitConverter.ToString(frame));
+            await SendFrame(frame);
+        }
+
+        public async Task RemoteLightBlinkControl(int lightNumber, bool state)
+        {
+            _isSend = true;
+            if (!_comDataService.IsConnected()) return;
+            byte[] frame = new byte[3];
+            frame[0] = 0x06;
+            frame[1] = 0x00;
+
+            byte byteValue = 0x00; // Khởi tạo byte với giá trị ban đầu là 0x00
+            byteValue |= (byte)(lightNumber << 4); // Dịch số 3 vào 4 bit cao
+            if (state == true) byteValue |= (byte)(1 << 3); // Dịch số 1 vào 4 bit thấp
+            else byteValue |= (byte)(0 << 3);
 
             byteValue >>= 1;
 

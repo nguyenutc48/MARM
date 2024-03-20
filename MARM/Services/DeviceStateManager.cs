@@ -63,14 +63,12 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         if (data[0] == (byte)RemoteAddress.Main)
         {
             SetBattery((int)RemoteAddress.Main, (int)data[1]);
-            if (data[2] == 0xFF) SetMainTargetConnectState(TargetConnectState.Good);
-            else SetMainTargetConnectState(TargetConnectState.Lost);
+            SetMainTargetConnectState(TargetConnectState.Good);
         }
         if (data[0] == (byte)RemoteAddress.Sub)
         {
             SetBattery((int)RemoteAddress.Sub, (int)data[1]);
-            if (data[2] == 0xFF) SetSubTargetConnectState(TargetConnectState.Good);
-            else SetSubTargetConnectState(TargetConnectState.Lost);
+            SetSubTargetConnectState(TargetConnectState.Good);
         }
     }
 
