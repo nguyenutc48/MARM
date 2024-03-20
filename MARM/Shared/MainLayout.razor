@@ -80,7 +80,6 @@
         if (comService.IsConnected())
         {
             pageNavi.NavigateTo(0);
-            dataSender.RemoteUpdateStatus();
         }
 
         else
@@ -92,6 +91,7 @@
         _ = InvokeAsync(() =>
         {
             NavigateToLink(navLinks[pageIndex]);
+            if(pageIndex == 0) dataSender.RemoteUpdateStatus();
             StateHasChanged();
         });
     }
