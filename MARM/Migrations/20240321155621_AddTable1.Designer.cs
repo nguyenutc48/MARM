@@ -3,6 +3,7 @@ using System;
 using MARM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,69 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MARM.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240321155621_AddTable1")]
+    partial class AddTable1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.12");
-
-            modelBuilder.Entity("MARM.Data.AppConfig", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Id");
-
-                    b.Property<int>("Baudrate")
-                        .HasColumnType("INT")
-                        .HasColumnName("Baudrate");
-
-                    b.Property<int>("Light1Mode")
-                        .HasColumnType("INT")
-                        .HasColumnName("Light1Mode");
-
-                    b.Property<int>("Light2Mode")
-                        .HasColumnType("INT")
-                        .HasColumnName("Light2Mode");
-
-                    b.Property<int>("Light3Mode")
-                        .HasColumnType("INT")
-                        .HasColumnName("Light3Mode");
-
-                    b.Property<int>("Light4Mode")
-                        .HasColumnType("INT")
-                        .HasColumnName("Light4Mode");
-
-                    b.Property<string>("Port")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("Port");
-
-                    b.Property<int>("TimerInterval")
-                        .HasColumnType("INT")
-                        .HasColumnName("TimerInterval");
-
-                    b.Property<bool>("Transmit1")
-                        .HasColumnType("BOOL")
-                        .HasColumnName("Transmit1");
-
-                    b.Property<bool>("Transmit2")
-                        .HasColumnType("BOOL")
-                        .HasColumnName("Transmit2");
-
-                    b.Property<bool>("Transmit3")
-                        .HasColumnType("BOOL")
-                        .HasColumnName("Transmit3");
-
-                    b.Property<bool>("Transmit4")
-                        .HasColumnType("BOOL")
-                        .HasColumnName("Transmit4");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppConfigs");
-                });
 
             modelBuilder.Entity("MARM.Data.BoatUnitMission", b =>
                 {

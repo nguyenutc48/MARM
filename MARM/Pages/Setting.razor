@@ -1,11 +1,12 @@
 ﻿@using ElectronNET.API
+@using MARM.Data
 @using MARM.Services
 @inherits LayoutComponentBase
 
 @page "/setting"
 
 <PageTitle>Setting</PageTitle>
-
+@inject ApplicationDbContext ApplicationDb
 @inject IComDataService comService
 @inject IDataSendService dataSender
 @inject IDataSettingService dataSetting
@@ -190,24 +191,53 @@
     private bool IsExpanded2 { get; set; } = true;
     private bool IsExpanded3 { get; set; } = false;
 
-    protected override void OnInitialized()
+    private AppConfig appConfig = new AppConfig();
+    private string IdofConfig = "";
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         if (!comService.IsConnected()) IsExpanded3 = true;
-        Transmit1 = dataSetting.Transmit1;
-        Transmit2 = dataSetting.Transmit2;
-        Transmit3 = dataSetting.Transmit3;
-        Transmit4 = dataSetting.Transmit4;
+        var config = await ApplicationDb.GetConfigAsync();
+        if(config != null)
+        {
+            appConfig = config;
+            IdofConfig = config.Id.ToString();
+            Transmit1 = config.Transmit1;
+            Transmit2 = config.Transmit2;
+            Transmit3 = config.Transmit3;
+            Transmit4 = config.Transmit4;
 
-        Light1Mode = dataSetting.Light1Mode;
-        Light2Mode = dataSetting.Light2Mode;
-        Light3Mode = dataSetting.Light3Mode;
-        Light4Mode = dataSetting.Light4Mode;
+            Light1Mode = config.Light1Mode;
+            Light2Mode = config.Light2Mode;
+            Light3Mode = config.Light3Mode;
+            Light4Mode = config.Light4Mode;
 
-        TimerInterval = dataSetting.TimerInterval;
+            TimerInterval = config.TimerInterval;
 
-        Port = dataSetting.Port;
-        Baudrate = dataSetting.Baudrate;
+            Port = config.Port;
+            Baudrate = config.Baudrate;
+        }
+        else
+        {
+            var configNew = new AppConfig();
+            configNew.Transmit1 = Transmit1;
+            configNew.Transmit2 = Transmit2;
+            configNew.Transmit3 = Transmit3;
+            configNew.Transmit4 = Transmit4;
+
+            configNew.TimerInterval = TimerInterval;
+
+            configNew.Light1Mode = Light1Mode;
+            configNew.Light2Mode = Light2Mode;
+            configNew.Light3Mode = Light3Mode;
+            configNew.Light4Mode = Light4Mode;
+
+            configNew.Baudrate = Baudrate;
+            configNew.Port = Port;
+            await ApplicationDb.CreateConfigAsync(configNew);
+        }
+        StateHasChanged();
     }
 
     private void EnableEditTransmit()
@@ -228,16 +258,21 @@
         EditTransmit = false;
     }
 
-    private void UpdateTransmit()
+    private async void UpdateTransmit()
     {
         EditTransmit = false;
+        appConfig.Transmit1 = Transmit1;
+        appConfig.Transmit2 = Transmit2;
+        appConfig.Transmit3 = Transmit3;
+        appConfig.Transmit4 = Transmit4;
+        await ApplicationDb.UpdateConfigAsync(appConfig);
     }
 
 
     private bool EditFrequency { get; set; } = false;
 
     private int TimerInterval { get; set; } = 500;
-    private int ResetTimerInterval { get; set; } = 500;
+    private int ResetTimerInterval { get; set; } 
 
     private void EnableEditFrequency()
     {
@@ -251,16 +286,18 @@
         EditFrequency = false;
     }
 
-    private void UpdateFrequency()
+    private async void UpdateFrequency()
     {
         EditFrequency = false;
+        appConfig.TimerInterval = TimerInterval;
+        await ApplicationDb.UpdateConfigAsync(appConfig);
     }
 
-    private bool EditComPort { get; set; } = false;
+    private bool EditComPort { get; set; }
     private int Baudrate { get; set; } = 57600;
-    private int ResetBaudrate { get; set; } = 57600;
+    private int ResetBaudrate { get; set; }
     private string Port { get; set; } = "COM16";
-    private string ResetPort { get; set; } = "COM16";
+    private string ResetPort { get; set; } = "";
 
     private void EnableEditComPort()
     {
@@ -276,9 +313,12 @@
         EditComPort = false;
     }
 
-    private void UpdateComPort()
+    private async void UpdateComPort()
     {
         EditComPort = false;
+        appConfig.Port = Port;
+        appConfig.Baudrate = Baudrate;
+        await ApplicationDb.UpdateConfigAsync(appConfig);
     }
 
     private void ConnectClick()
@@ -290,10 +330,10 @@
 
 
     private bool EditLightMode { get; set; } = false;
-    private int Light1Mode { get; set; }
-    private int Light2Mode { get; set; }
-    private int Light3Mode { get; set; }
-    private int Light4Mode { get; set; }
+    private int Light1Mode { get; set; } = 1;
+    private int Light2Mode { get; set; } = 0;
+    private int Light3Mode { get; set; } = 0;
+    private int Light4Mode { get; set; } = 0;
     private int ResetLight1Mode { get; set; }
     private int ResetLight2Mode { get; set; }
     private int ResetLight3Mode { get; set; }
@@ -317,8 +357,13 @@
         EditLightMode = false;
     }
 
-    private void UpdateLightMode()
+    private async void UpdateLightMode()
     {
         EditLightMode = false;
+        appConfig.Light1Mode = Light1Mode;
+        appConfig.Light2Mode = Light2Mode;
+        appConfig.Light3Mode = Light3Mode;
+        appConfig.Light4Mode = Light4Mode;
+        await ApplicationDb.UpdateConfigAsync(appConfig);
     }
 }

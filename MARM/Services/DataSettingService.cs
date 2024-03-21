@@ -1,13 +1,15 @@
 ﻿
 
+using MARM.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Runtime.CompilerServices;
 
 namespace MARM.Services
 {
     public class DataSettingService : IDataSettingService
     {
-        private bool _Transmit1 { get; set; } = true;
+        private bool _Transmit1 { get; set; } = false;
         public event Action<bool>? Transmit1Changed;
         private bool _Transmit2 { get; set; }
         public event Action<bool>? Transmit2Changed;

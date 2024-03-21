@@ -7,6 +7,7 @@ public class ApplicationDbContext : DbContext
     private DbSet<Mission> Missions { get; set; }
     private DbSet<BoatUnitMission> BoatUnitMissions { get; set; }
     private DbSet<BoatUnitShot> BoatUnitShots { get; set; }
+    private DbSet<AppConfig> AppConfigs { get; set; }
 
     public ApplicationDbContext(DbContextOptions options) : base(options) { }
 
@@ -192,6 +193,27 @@ public class ApplicationDbContext : DbContext
 
         boat.Name = name;
         boat.Note = note;
+        await SaveChangesAsync();
+        return new Result() { IsSuccess = true, Message = "", };
+    }
+    public async Task<AppConfig> GetConfigAsync()
+    {
+        var config = new AppConfig();
+        config = await AppConfigs.FirstOrDefaultAsync();
+        if (config == null) return null;
+        return config;
+    }
+
+    public async Task<Result> CreateConfigAsync(AppConfig config)
+    {
+        await AppConfigs.AddAsync(config);
+        await SaveChangesAsync();
+        return new Result() { IsSuccess = true, Message = "", };
+    }
+
+    public async Task<Result> UpdateConfigAsync(AppConfig config)
+    {
+        AppConfigs.Update(config);
         await SaveChangesAsync();
         return new Result() { IsSuccess = true, Message = "", };
     }

@@ -18,7 +18,7 @@ builder.Services.Configure<IDataSettingService>(
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlite($"Data Source=database.db");
+    options.UseSqlite($"Data Source=C:\\Users\\Admin\\MARM\\MARM\\database.db");
 });
 builder.Services.AddSingleton<ComDataService>();
 builder.Services.AddSingleton<DataSendService>();
