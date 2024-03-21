@@ -1,5 +1,8 @@
 ﻿
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+
 namespace MARM.Services
 {
     public class DataSettingService : IDataSettingService

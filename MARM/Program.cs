@@ -1,5 +1,6 @@
 using ElectronNET.API;
 using ElectronNET.API.Entities;
+using MARM;
 using MARM.Data;
 using MARM.Services;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+
+builder.Services.Configure<IDataSettingService>(
+    builder.Configuration.GetSection("AppOptions"));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
