@@ -8,6 +8,7 @@
 
 @inject IComDataService comService
 @inject IDataSendService dataSender
+@inject IDataSettingService dataSetting
 
 <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex flex-row justify-content-between">
@@ -193,6 +194,20 @@
     {
         base.OnInitialized();
         if (!comService.IsConnected()) IsExpanded3 = true;
+        Transmit1 = dataSetting.Transmit1;
+        Transmit2 = dataSetting.Transmit2;
+        Transmit3 = dataSetting.Transmit3;
+        Transmit4 = dataSetting.Transmit4;
+
+        Light1Mode = dataSetting.Light1Mode;
+        Light2Mode = dataSetting.Light2Mode;
+        Light3Mode = dataSetting.Light3Mode;
+        Light4Mode = dataSetting.Light4Mode;
+
+        TimerInterval = dataSetting.TimerInterval;
+
+        Port = dataSetting.Port;
+        Baudrate = dataSetting.Baudrate;
     }
 
     private void EnableEditTransmit()

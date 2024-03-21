@@ -2,22 +2,30 @@
 {
     public interface IDataSettingService
     {
-        event Action<string> DataSettingChanged;
         bool Transmit1 { get; set; }
+        event Action<bool> Transmit1Changed;
         bool Transmit2 { get; set; }
+        event Action<bool> Transmit2Changed;
         bool Transmit3 { get; set; }
+        event Action<bool> Transmit3Changed;
         bool Transmit4 { get; set; }
-        bool EditComPort { get; set; }
-        bool EditLightMode { get; set; }
-        bool IsExpanded0 { get; set; }
-        bool IsExpanded1 { get; set; }
-        bool IsExpanded2 { get; set; }
-        bool IsExpanded3 { get; set; }
+        event Action<bool> Transmit4Changed;
+
+        int TimerInterval { get; set; }
+        event Action<int> TimerIntervalChanged;
+
         int Light1Mode { get; set; }
+        event Action<int> Light1ModeChanged;
         int Light2Mode { get; set; }
+        event Action<int> Light2ModeChanged;
         int Light3Mode { get; set; }
+        event Action<int> Light3ModeChanged;
         int Light4Mode { get; set; }
+        event Action<int> Light4ModeChanged;
+
         int Baudrate { get; set; }
+        event Action<int> BaudrateChanged;
         string Port { get; set; }
+        event Action<string> PortChanged;
     }
 }
