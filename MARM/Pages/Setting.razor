@@ -175,7 +175,7 @@
 
 @code {
     private bool EditTransmit { get; set; } = false;
-    private bool Transmit1 { get; set; }
+    private bool Transmit1 { get; set; } = true;
     private bool Transmit2 { get; set; }
     private bool Transmit3 { get; set; }
     private bool Transmit4 { get; set; }
@@ -269,6 +269,8 @@
     private void ConnectClick()
     {
         comService.Open(Port, Baudrate);
+        if (comService.IsConnected()) EditComPort = false;
+        else EditComPort = true;
     }
 
 

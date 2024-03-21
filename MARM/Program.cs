@@ -18,8 +18,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 builder.Services.AddSingleton<ComDataService>();
 builder.Services.AddSingleton<DataSendService>();
+builder.Services.AddSingleton<DataSettingService>();
 builder.Services.AddSingleton<IComDataService>(sp => sp.GetRequiredService<ComDataService>());
 builder.Services.AddSingleton<IDataSendService>(sp => sp.GetRequiredService<DataSendService>());
+builder.Services.AddSingleton<IDataSettingService>(sp => sp.GetRequiredService<DataSettingService>());
 builder.Services.AddSingleton<DeviceStateManager>();
 builder.Services.AddSingleton<ITargetConnectStateManager>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ILightController>(sp => sp.GetRequiredService<DeviceStateManager>());
