@@ -1,4 +1,5 @@
 ﻿using ElectronNET.API.Entities;
+using MARM.Data;
 using MARM.Enums;
 using Microsoft.AspNetCore.Components;
 using System.Data;
@@ -36,6 +37,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public bool Light4 { get; private set; }
 
     private DataSendService _dataSendService;
+
     public DeviceStateManager(DataSendService dataSendService)
     {
         _dataSendService = dataSendService;
@@ -179,6 +181,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
+        await Task.Delay(1000);
         if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
 
@@ -202,6 +205,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
+        await Task.Delay(1000);
         if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
 
@@ -218,6 +222,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             else
                 await _dataSendService.LightControl(pageLightCode[i], false);
         }
+        await Task.Delay(1000);
         if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
     #endregion

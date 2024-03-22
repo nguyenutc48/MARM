@@ -3,12 +3,43 @@
 using MARM.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Runtime.CompilerServices;
 
 namespace MARM.Services
 {
     public class DataSettingService : IDataSettingService
     {
+        private readonly IConfiguration _configuration;
+        public DataSettingService(IConfiguration configuration)
+        {
+
+            _configuration = configuration; 
+
+        }
+        public string ReadDataSetting(string key)
+        {
+            return _configuration.GetValue<string>(key);
+        }
+        public void WriteSetting(string key, string value)
+        {
+            var json = File.ReadAllText("appsettings.json");
+            var jsonObj = JObject.Parse(json);
+
+            // Kiểm tra nếu mục MySettings không tồn tại
+            if (jsonObj["DataSetting"] == null)
+            {
+                // Tạo một mục MySettings mới
+                jsonObj["DataSetting"] = new JObject();
+            }
+
+            // Gán giá trị cho key
+            jsonObj["DataSetting"][key] = value;
+
+            string output = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
+            File.WriteAllText("appsettings.json", output);
+        }
         private bool _Transmit1 { get; set; } = false;
         public event Action<bool>? Transmit1Changed;
         private bool _Transmit2 { get; set; }
@@ -45,9 +76,9 @@ namespace MARM.Services
         public int Light2Mode { get {return _Light2Mode; } set { _Light2Mode = value; Light2ModeChanged?.Invoke(_Light2Mode);} }
         public int Light3Mode { get {return _Light3Mode; } set { _Light3Mode = value; Light3ModeChanged?.Invoke(_Light3Mode);} }
         public int Light4Mode { get {return _Light4Mode; } set { _Light4Mode = value; Light4ModeChanged?.Invoke(_Light4Mode);} }
-        public int Baudrate { get {return _Baudrate; } set { _Baudrate = value; BaudrateChanged?.Invoke(_Baudrate);} }
+        public int Baudrate { get {return _Baudrate; } set { _Baudrate = value; BaudrateChanged?.Invoke(_Baudrate); WriteSetting("Baudrate", Baudrate.ToString()); } }
 
-        public string Port { get { return _Port; } set { _Port = value; PortChanged?.Invoke(_Port); } }
+        public string Port { get { return _Port; } set { _Port = value; PortChanged?.Invoke(_Port); WriteSetting("Port",Port); } }
 
     }
 }

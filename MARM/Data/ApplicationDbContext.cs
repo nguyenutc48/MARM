@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
 
     public ApplicationDbContext(DbContextOptions options) : base(options) { }
 
+
     public async Task<IEnumerable<NavalUnit>> GetNavalUnits(Guid parentId) => await NavalUnits.Where(u => u.ParentId == parentId).ToListAsync();
 
     public async Task<Result<NavalUnit>> CreateNavalUnit(Guid parentId, string name)

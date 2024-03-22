@@ -10,6 +10,8 @@
 @inject IComDataService comService
 @inject IDataSendService dataSender
 @inject IDataSettingService dataSetting
+@inject ISnackbar Snackbar
+@inject IPageNavigationService pageNavi
 
 <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex flex-row justify-content-between">
@@ -170,7 +172,7 @@
                         <div>
                             <MudTextField T="string" ReadOnly="@(!EditComPort)" @bind-Value="Port" Label="Port" Required="true" Variant="Variant.Outlined" Step="1"  />
                             <MudNumericField T="int" ReadOnly="@(!EditComPort)" @bind-Value="Baudrate" Label="Baudrate" Required="true" Variant="Variant.Outlined" Step="1" />
-                            <MudButton OnClick="ConnectClick" ReadOnly="@(!EditComPort)" Variant="Variant.Filled" Color="Color.Secondary">Connect</MudButton>
+                            <MudButton OnClick="ConnectClick" Disabled="@(!EditComPort)" Variant="Variant.Filled" Color="Color.Secondary">Connect</MudButton>
                         </div>
                     </ChildContent>
                 </MudExpansionPanel>
@@ -201,7 +203,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        if (!comService.IsConnected()) IsExpanded3 = true;
+        if (!comService.IsConnected()) { IsExpanded3 = true; EditComPort = true; }
         var config = await ApplicationDb.GetConfigAsync();
         if(config != null)
         {
@@ -332,11 +334,20 @@
         dataSetting.Baudrate = Baudrate;
     }
 
-    private void ConnectClick()
+    private async void ConnectClick()
     {
         comService.Open(Port, Baudrate);
-        if (comService.IsConnected()) EditComPort = false;
-        else EditComPort = true;
+        await Task.Delay(100);
+        if (comService.IsConnected()) 
+        { 
+            EditComPort = false; Snackbar.Add("Đã kết nối thành công", Severity.Success);
+            pageNavi.NavigateTo(0);
+            UpdateComPort();
+        }
+        else
+        {
+            EditComPort = true; Snackbar.Add("Không thể kết nối đến cổng COM", Severity.Error);
+        }
     }
 
 

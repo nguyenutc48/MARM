@@ -37,7 +37,7 @@ builder.Services.AddSingleton<MissionManager>();
 
 
 
-builder.Services.AddHostedService<RandomTestService>();
+builder.Services.AddHostedService<DoBackGroud>();
 
 
 
