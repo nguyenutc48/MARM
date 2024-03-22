@@ -50,20 +50,24 @@
                                     <MudText Typo="Typo.h6" Class="mx-3">Khối phát 1</MudText>
                                     <MudSwitch @bind-Checked="@Transmit1" ReadOnly="@(!EditTransmit)" Size="Size.Large" Color="Color.Success" UnCheckedColor="Color.Error" />
                                 </div>
+                               @*  <div class="d-flex flex-row align-items-center">
+                                    <MudText Typo="Typo.h6" Class="mx-3">Khối phát 2</MudText>
+                                    <MudSwitch @bind-Checked="@Transmit2" ReadOnly="@(!EditTransmit)" Size="Size.Large" Color="Color.Success" UnCheckedColor="Color.Error" />
+                                </div> *@
+                            </div>
+                            <div class="flex-grow-1 d-flex flex-column">
                                 <div class="d-flex flex-row align-items-center">
                                     <MudText Typo="Typo.h6" Class="mx-3">Khối phát 2</MudText>
                                     <MudSwitch @bind-Checked="@Transmit2" ReadOnly="@(!EditTransmit)" Size="Size.Large" Color="Color.Success" UnCheckedColor="Color.Error" />
                                 </div>
-                            </div>
-                            <div class="flex-grow-1 d-flex flex-column">
-                                <div class="d-flex flex-row align-items-center">
+    @*                             <div class="d-flex flex-row align-items-center">
                                     <MudText Typo="Typo.h6" Class="mx-3">Khối phát 3</MudText>
                                     <MudSwitch @bind-Checked="@Transmit3" ReadOnly="@(!EditTransmit)" Size="Size.Large" Color="Color.Success" UnCheckedColor="Color.Error" />
                                 </div>
                                 <div class="d-flex flex-row align-items-center">
                                     <MudText Typo="Typo.h6" Class="mx-3">Khối phát 4</MudText>
                                     <MudSwitch @bind-Checked="@Transmit4" ReadOnly="@(!EditTransmit)" Size="Size.Large" Color="Color.Success" UnCheckedColor="Color.Error" />
-                                </div>
+                                </div> *@
                             </div>
                         </div>
                     </ChildContent>
@@ -266,6 +270,10 @@
         appConfig.Transmit3 = Transmit3;
         appConfig.Transmit4 = Transmit4;
         await ApplicationDb.UpdateConfigAsync(appConfig);
+        dataSetting.Transmit1 = Transmit1;
+        dataSetting.Transmit2 = Transmit2;
+        dataSetting.Transmit3 = Transmit3;
+        dataSetting.Transmit4 = Transmit4;
     }
 
 
@@ -291,6 +299,7 @@
         EditFrequency = false;
         appConfig.TimerInterval = TimerInterval;
         await ApplicationDb.UpdateConfigAsync(appConfig);
+        dataSetting.TimerInterval = TimerInterval;
     }
 
     private bool EditComPort { get; set; }
@@ -319,6 +328,8 @@
         appConfig.Port = Port;
         appConfig.Baudrate = Baudrate;
         await ApplicationDb.UpdateConfigAsync(appConfig);
+        dataSetting.Port = Port;
+        dataSetting.Baudrate = Baudrate;
     }
 
     private void ConnectClick()
@@ -365,5 +376,9 @@
         appConfig.Light3Mode = Light3Mode;
         appConfig.Light4Mode = Light4Mode;
         await ApplicationDb.UpdateConfigAsync(appConfig);
+        dataSetting.Light1Mode = Light1Mode;
+        dataSetting.Light2Mode = Light2Mode;
+        dataSetting.Light3Mode = Light3Mode;
+        dataSetting.Light4Mode = Light4Mode;
     }
 }
