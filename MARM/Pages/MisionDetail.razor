@@ -2,10 +2,13 @@
 
 @using MARM.Data
 @using MARM.Components.MissionComponents
+@using MARM.Services
+@using MARM.Enums
 
 @inject ApplicationDbContext ApplicationDb
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject IDataSendService dataSender
 
 <style>
     .boat-unit-selected {
@@ -34,7 +37,7 @@
                 <img src="images/wifi.png" height="50" style="transform: rotate(90deg);" alt="wifi" />
                 <div class="bg-connect"></div>
                 <img src="images/wifi.png" height="50" style="transform: rotate(-90deg);" alt="wifi" />
-                <img src="images/Picture2.png" height="200" alt="computer" />
+                <img src="images/Picture2.png" height="100" alt="computer" />
             </div>
             <div class="flex-grow-1 d-flex flex-column">
                 <div class="d-flex justify-content-center">
@@ -210,9 +213,9 @@
                             </div>
                         </ToolBarContent>
                         <HeaderContent>
-                            <MudTh>STT</MudTh>
-                            <MudTh>Thời gian</MudTh>
-                            <MudTh>Vị trí</MudTh>
+                            <MudTh Style="text-align: center">STT</MudTh>
+                            <MudTh Style="text-align: center">Thời gian</MudTh>
+                            <MudTh Style="text-align: center">Vị trí</MudTh>
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd DataLabel="STT" Style="text-align: center">@context.Index</MudTd>
@@ -234,9 +237,9 @@
                             </div>
                         </ToolBarContent>
                         <HeaderContent>
-                            <MudTh>STT</MudTh>
-                            <MudTh>Thời gian</MudTh>
-                            <MudTh>Vị trí</MudTh>
+                            <MudTh Style="text-align: center">STT</MudTh>
+                            <MudTh Style="text-align: center">Thời gian</MudTh>
+                            <MudTh Style="text-align: center">Vị trí</MudTh>
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd DataLabel="STT" Style="text-align: center">@context.Index</MudTd>
@@ -253,7 +256,7 @@
     </MudCard>
 </MudOverlay>
 
-@code {
+    @code {
     [Parameter]
     public string? MissionIdStr { get; set; }
 
@@ -290,12 +293,14 @@
     private bool ViewDetailDisable => SelectedBoatUnitMissionResult is null;
 
     private bool ShowDetailBoatShots { get; set; }
-    private List<BoatUnitShotDetail> MainBoatUnitShots = new();
-    private List<BoatUnitShotDetail> SubBoatUnitShots = new();
+
+    private List<BoatUnitShotDetail> MainBoatUnitShots = new List<BoatUnitShotDetail>();
+    private List<BoatUnitShotDetail> SubBoatUnitShots = new List<BoatUnitShotDetail>();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        dataSender.ShotStateReceived += HandlShotStateReceived;
         if (string.IsNullOrEmpty(MissionIdStr))
         {
             Error = "Không tìm thấy thông tin nhiệm vụ với id trống";
@@ -340,10 +345,77 @@
                         MissionId = boat.MissionId,
                         ShotCounts = boat.ShotCounts,
                     });
+                // var shots = await ApplicationDb.GetBoatUnitShots(boat.Id);
+                // foreach (var shot in shots)
+                // {
+                //     if(shot.Position < 8)
+                //     {
+                //         MainBoatUnitShots.Add(new BoatUnitShotDetail()
+                //             {
+                //                 Id = shot.Id,
+                //                 Index = MainBoatUnitShots.Count() + 1,
+                //                 BoatUnitId = boat.Id,
+                //                 Position = shot.Position,
+                //                 Time = shot.Time
+
+                //             });
+                //     }
+                //     if (shot.Position >= 8 && shot.Position < 16)
+                //     {
+                //         SubBoatUnitShots.Add(new BoatUnitShotDetail()
+                //             {
+                //                 Id = shot.Id,
+                //                 Index = SubBoatUnitShots.Count() + 1,
+                //                 BoatUnitId = boat.Id,
+                //                 Position = shot.Position,
+                //                 Time = shot.Time
+
+                //             });
+                //     }
+                // }
             }
 
             StateHasChanged();
         }
+    }
+
+    private void HandlShotStateReceived(byte[] data)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await Task.Delay(100);
+            if (data[0] == (byte)RemoteAddress.Main)
+            {
+                if (SelectedBoatUnitMissionResult != null)
+                {
+                    int shotPosition = (data[1] >> 4) & 0xF;
+                    var result = await ApplicationDb.CreateBoatUnitShot(SelectedBoatUnitMissionResult.Id, shotPosition);
+                    if (!result.IsSuccess)
+                    {
+                        Snackbar.Add(result.Message, Severity.Error);
+                    }
+                    else if (result.Value is null)
+                    {
+                        Snackbar.Add("Lỗi dữ liệu bắn", Severity.Error);
+                    }
+                    else
+                    {
+                        MainBoatUnitShots.Add(new BoatUnitShotDetail()
+                            {
+                                Id = result.Value.Id,
+                                Index = MainBoatUnitShots.Count() + 1,
+                                Time = result.Value.Time,
+                                Position = result.Value.Position+1,
+                            });
+                    }
+                    SelectedBoatUnitMissionResult.ShotCounts[shotPosition] += 1;
+                    SelectedBoatUnitMissionResult.ShotTotal += 1;
+                }
+            }
+            StateHasChanged();
+        });
+
+
     }
 
     private void BackupBoatUnitMissionResult(object obj)
@@ -454,11 +526,41 @@
         }
     }
 
-    private void OnSelectedBoatUnitMissionResultChanged(BoatUnitMissionResult element)
+    private async void OnSelectedBoatUnitMissionResultChanged(BoatUnitMissionResult element)
     {
         if (element == SelectedBoatUnitMissionResult) return;
 
         SelectedBoatUnitMissionResult = element;
+        MainBoatUnitShots.Clear();
+        SubBoatUnitShots.Clear();
+        var shots = await ApplicationDb.GetBoatUnitShots(SelectedBoatUnitMissionResult.Id);
+        foreach (var shot in shots)
+        {
+            if(shot.Position < 8)
+            {
+                MainBoatUnitShots.Add(new BoatUnitShotDetail()
+                    {
+                        Id = shot.Id,
+                        Index = MainBoatUnitShots.Count() + 1,
+                        BoatUnitId = SelectedBoatUnitMissionResult.Id,
+                        Position = shot.Position+1,
+                        Time = shot.Time
+
+                    });
+            }
+            if (shot.Position >= 8 && shot.Position < 16)
+            {
+                SubBoatUnitShots.Add(new BoatUnitShotDetail()
+                    {
+                        Id = shot.Id,
+                        Index = SubBoatUnitShots.Count() + 1,
+                        BoatUnitId = SelectedBoatUnitMissionResult.Id,
+                        Position = shot.Position+1,
+                        Time = shot.Time
+
+                    });
+            }
+        }
         StateHasChanged();
     }
 

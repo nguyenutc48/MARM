@@ -156,7 +156,7 @@ namespace MARM.Services
             Array.Copy(data, 0, dataSend, 3, data.Length);
             dataSend[dataSend.Length - 1] = 0x03;
             dataSend[dataSend.Length - 2] = GetCRC(dataSend);
-            Console.WriteLine("Frame Send: " + BitConverter.ToString(dataSend));
+            //Console.WriteLine("Frame Send: " + BitConverter.ToString(dataSend));
 
             await _comDataService.SendByte(dataSend);
         }
@@ -192,14 +192,14 @@ namespace MARM.Services
 
                 Array.Copy(buffer, startFrameIndex, receivedFrame, 0, endFrameIndex - startFrameIndex + 1);
 
-                Console.WriteLine("Frame Received: " + BitConverter.ToString(receivedFrame));
+                //Console.WriteLine("Frame Received: " + BitConverter.ToString(receivedFrame));
                 if (CheckCRC(receivedFrame))
                     return receivedFrame;
                 else return Array.Empty<byte>();
             }
             else
             {
-                Console.WriteLine("Frame in received data was not found");
+                //Console.WriteLine("Frame in received data was not found");
                 return Array.Empty<byte>();
             }
         }

@@ -21,7 +21,6 @@ public class BoatUnitShot
 
     [Column("Time", TypeName = "TEXT")]
     [Required]
-
     public DateTime Time { get; set; }
 
     [Column("Position", TypeName = "INT")]

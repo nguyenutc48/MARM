@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 namespace MARM.Data;
 
 public class ApplicationDbContext : DbContext
@@ -129,10 +130,12 @@ public class ApplicationDbContext : DbContext
         var boards = await BoatUnitMissions.Where(u => u.MissionId == id).ToListAsync();
         foreach (var board in boards)
         {
-            for(int i = 0; i < board.ShotCounts.Length; i++)
+            var boatUnitShots = await BoatUnitShots.Where(s=>s.BoatUnitId == board.Id).ToListAsync();
+
+            foreach (var boatUnitShot in boatUnitShots)
             {
-                board.ShotCounts[i] = rnd.Next(0, 25);
-                board.ShotTotal += board.ShotCounts[i];
+                board.ShotTotal++;
+                board.ShotCounts[boatUnitShot.Position] ++;
             }
         }
 
@@ -197,6 +200,22 @@ public class ApplicationDbContext : DbContext
         await SaveChangesAsync();
         return new Result() { IsSuccess = true, Message = "", };
     }
+
+    public async Task<IEnumerable<BoatUnitShot>> GetBoatUnitShots(Guid id) => await BoatUnitShots.Where(s => s.BoatUnitId == id).ToListAsync();
+
+    public async Task<Result<BoatUnitShot>> CreateBoatUnitShot(Guid boatId, int position)
+    {
+        var entry = await BoatUnitShots.AddAsync(new BoatUnitShot()
+        {
+            BoatUnitId = boatId,
+            Position = position,
+            Time = DateTime.Now,
+        });
+
+        await SaveChangesAsync();
+        return new Result<BoatUnitShot> { IsSuccess = true, Message = "", Value = entry.Entity, };
+    }
+
     public async Task<AppConfig> GetConfigAsync()
     {
         var config = new AppConfig();
