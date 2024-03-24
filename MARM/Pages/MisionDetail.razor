@@ -9,6 +9,7 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @inject IDataSendService dataSender
+@inject IPageNavigationService pageNavi
 
 <style>
     .boat-unit-selected {
@@ -84,6 +85,9 @@
                 <MudCardHeader Class="align-items-center">
                     <CardHeaderContent>
                         <div class="w-100 d-flex flex-row justify-content-between align-items-center">
+                            <div>
+                                <MudIconButton @onclick="NavigateBack" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
+                            </div>
                             <MudText>Danh sách đơn vị tàu của nhiệm vụ <b>@Mission.Name</b></MudText>
                             <div class="d-flex flex-row align-items-center">
                                 <MudToggleIconButton @bind-Toggled="@ListBoatUintReadOnly"
@@ -335,44 +339,24 @@
             int index = 1;
             foreach (var boat in boats)
             {
+                var shots = await ApplicationDb.GetBoatUnitShots(boat.Id);
+                var boatShotTotal = 0;
+                var boatShotCounts = new int[16];
+                foreach (var shot in shots)
+                {
+                    boatShotTotal++;
+                    boatShotCounts[shot.Position] ++;
+                }
                 BoatUnitMissionResults.Add(new BoatUnitMissionResult()
                     {
                         Id = boat.Id,
                         Index = index++,
                         Name = boat.Name,
                         Note = boat.Note,
-                        ShotTotal = boat.ShotTotal,
+                        ShotTotal = boatShotTotal,
                         MissionId = boat.MissionId,
-                        ShotCounts = boat.ShotCounts,
+                        ShotCounts = boatShotCounts,
                     });
-                // var shots = await ApplicationDb.GetBoatUnitShots(boat.Id);
-                // foreach (var shot in shots)
-                // {
-                //     if(shot.Position < 8)
-                //     {
-                //         MainBoatUnitShots.Add(new BoatUnitShotDetail()
-                //             {
-                //                 Id = shot.Id,
-                //                 Index = MainBoatUnitShots.Count() + 1,
-                //                 BoatUnitId = boat.Id,
-                //                 Position = shot.Position,
-                //                 Time = shot.Time
-
-                //             });
-                //     }
-                //     if (shot.Position >= 8 && shot.Position < 16)
-                //     {
-                //         SubBoatUnitShots.Add(new BoatUnitShotDetail()
-                //             {
-                //                 Id = shot.Id,
-                //                 Index = SubBoatUnitShots.Count() + 1,
-                //                 BoatUnitId = boat.Id,
-                //                 Position = shot.Position,
-                //                 Time = shot.Time
-
-                //             });
-                //     }
-                // }
             }
 
             StateHasChanged();
@@ -416,6 +400,11 @@
         });
 
 
+    }
+
+    private void NavigateBack()
+    {
+        pageNavi.NavigateTo(3);
     }
 
     private void BackupBoatUnitMissionResult(object obj)

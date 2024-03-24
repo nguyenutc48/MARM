@@ -9,7 +9,7 @@ using System.Reflection.Emit;
 
 namespace MARM.Services;
 
-public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, IPageNavigationService
+public class DeviceStateManager : ITargetConnectStateManager, ILightController, ITransmitterDeviceManager, IPageNavigationService, INavalTreeManagerService
 {
     public event Action<TargetConnectState>? MainTargetConnectStateChanged;
     public TargetConnectState MainTargetConnectState { get; private set; }
@@ -35,6 +35,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public bool Light2 { get; private set; }
     public bool Light3 { get; private set; }
     public bool Light4 { get; private set; }
+    public NavalUnitModel? SelectedNavalUnit { get; set; }
+    public NavalMission? SelectedNavalMission { get; set; }
 
     private DataSendService _dataSendService;
 

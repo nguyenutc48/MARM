@@ -31,6 +31,7 @@ builder.Services.AddSingleton<ITargetConnectStateManager>(sp => sp.GetRequiredSe
 builder.Services.AddSingleton<ILightController>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<ITransmitterDeviceManager>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<IPageNavigationService>(sp => sp.GetRequiredService<DeviceStateManager>());
+builder.Services.AddSingleton<INavalTreeManagerService>(sp => sp.GetRequiredService<DeviceStateManager>());
 
 
 builder.Services.AddSingleton<MissionManager>();
