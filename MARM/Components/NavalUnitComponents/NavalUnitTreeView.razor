@@ -113,25 +113,33 @@
     {
         var parent = new NavalUnitModel();
 
-        if (navalUnitModel.ParentId != Guid.Empty)
+        var parentDB = await ApplicationDb.GetNavalUnit(navalUnitModel.ParentId);
+        if (parentDB != null)
         {
-            var parentDB = await ApplicationDb.GetNavalUnit(navalUnitModel.ParentId);
-            if (parentDB != null)
-            {
-                var navalUnit = new NavalUnitModel()
-                    {
-                        Id = parent.Id,
-                        Name = parent.Name,
-                        IsExpanded = true,
-                        IsAffiliateLoaded = false,
-                        HasChild = true,
-                        Parent = await GetParent(parentDB),
-                    };
-                parent = navalUnit;
-            }
+            Console.WriteLine("1");
+            return new NavalUnitModel()
+                {
+                    Id = parent.Id,
+                    Name = parent.Name,
+                    IsExpanded = true,
+                    IsAffiliateLoaded = false,
+                    HasChild = true,
+                    Parent = await GetParent(parentDB),
+                };
         }
-
-        return parent;
+        else 
+        {
+            Console.WriteLine("2");
+            return new NavalUnitModel()
+                {
+                    Id = navalUnitModel.Id,
+                    Name = navalUnitModel.Name,
+                    IsExpanded = true,
+                    IsAffiliateLoaded = false,
+                    HasChild = true,
+                    Parent = null,
+                };
+        }
     }
 
 
