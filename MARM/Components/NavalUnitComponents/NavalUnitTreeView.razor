@@ -58,7 +58,7 @@
     </MudCard>
 </MudOverlay>
 
- @code {
+@code {
     private HashSet<NavalUnitModel> NavalUnits = new HashSet<NavalUnitModel>();
 
 
@@ -111,6 +111,15 @@
 
     public async Task<NavalUnitModel> GetParent(NavalUnit navalUnitModel)
     {
+        if (navalUnitModel.ParentId == Guid.Empty) return new NavalUnitModel()
+            {
+                Id = navalUnitModel.Id,
+                Name = navalUnitModel.Name,
+                IsExpanded = false,
+                IsAffiliateLoaded = false,
+                HasChild = true,
+                Parent = null,
+            };
         var parent = new NavalUnitModel();
 
         var parentDB = await ApplicationDb.GetNavalUnit(navalUnitModel.ParentId);
