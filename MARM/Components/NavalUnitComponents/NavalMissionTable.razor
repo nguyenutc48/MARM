@@ -1,8 +1,10 @@
 ﻿@using MARM.Data;
+@using MARM.Services
 
 @inject NavigationManager Nav
 @inject ApplicationDbContext ApplicationDb
 @inject ISnackbar Snackbar
+@inject INavalTreeManagerService NavalTreeManagerService
 @inject IDialogService DialogService
 
 <style>
@@ -112,6 +114,15 @@
     private string CreateNavalUnitMisionNote { get; set; } = "";
     private DateTime? CreateNavalUnitMisionStartAt { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (NavalTreeManagerService.SelectedNavalMission != null)
+        {
+            SelectedNavalMission = NavalTreeManagerService.SelectedNavalMission;
+        }
+    }
+
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         await base.SetParametersAsync(parameters);
@@ -149,6 +160,7 @@
 
         SelectedNavalMission = element;
         StateHasChanged();
+        NavalTreeManagerService.SelectedNavalMission = SelectedNavalMission;
         await SelectedNavalMissionChanged.InvokeAsync(SelectedNavalMission);
     }
 

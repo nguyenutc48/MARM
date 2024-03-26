@@ -36,6 +36,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public bool Light3 { get; private set; }
     public bool Light4 { get; private set; }
     public NavalUnitModel? SelectedNavalUnit { get; set; }
+    public HashSet<NavalUnitModel>? NavalUnits { get; set; }
     public NavalMission? SelectedNavalMission { get; set; }
 
     private DataSendService _dataSendService;

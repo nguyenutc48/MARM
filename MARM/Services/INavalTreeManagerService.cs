@@ -4,5 +4,6 @@
     {
         NavalUnitModel? SelectedNavalUnit { get; set; }
         NavalMission? SelectedNavalMission { get; set; }
+        HashSet<NavalUnitModel>? NavalUnits { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 ﻿@using MARM.Data;
 @using MARM.Services;
+@using Microsoft.Extensions.DependencyInjection
+@using System.Text.Json
 
 @inject ApplicationDbContext ApplicationDb
 @inject ISnackbar Snackbar
@@ -58,7 +60,7 @@
     </MudCard>
 </MudOverlay>
 
-@code {
+ @code {
     private HashSet<NavalUnitModel> NavalUnits = new HashSet<NavalUnitModel>();
 
 
@@ -76,11 +78,15 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        var units = await ApplicationDb.GetNavalUnits(Guid.Empty);
-        foreach (var unit in units)
+        if (NavalTreeManagerService.NavalUnits != null)
         {
-            if (SelectedNavalUnit == null)
+            NavalUnits = NavalTreeManagerService.NavalUnits;
+        }
+        else
+        {
+            var units = await ApplicationDb.GetNavalUnits(Guid.Empty);
+
+            foreach (var unit in units)
             {
                 NavalUnits.Add(new NavalUnitModel()
                     {
@@ -89,68 +95,14 @@
                         IsExpanded = false,
                         IsAffiliateLoaded = false,
                         HasChild = true,
-                        Parent = null,
+                        Parent = null
                     });
             }
-            else
-            {
-                // Xử lý khi có tree được lưu
-                NavalUnit a = new NavalUnit()
-                    {
-                        Id = SelectedNavalUnit.Id,
-                        Name = SelectedNavalUnit.Name,
-                        ParentId = SelectedNavalUnit.Parent.Id
-                    };
-                var parent = await GetParent(a);
-                Console.WriteLine(parent.Name);
-            }
-        }
 
+        }
+        
         StateHasChanged();
     }
-
-    public async Task<NavalUnitModel> GetParent(NavalUnit navalUnitModel)
-    {
-        if (navalUnitModel.ParentId == Guid.Empty) return new NavalUnitModel()
-            {
-                Id = navalUnitModel.Id,
-                Name = navalUnitModel.Name,
-                IsExpanded = false,
-                IsAffiliateLoaded = false,
-                HasChild = true,
-                Parent = null,
-            };
-        var parent = new NavalUnitModel();
-
-        var parentDB = await ApplicationDb.GetNavalUnit(navalUnitModel.ParentId);
-        if (parentDB != null)
-        {
-            Console.WriteLine("1");
-            return new NavalUnitModel()
-                {
-                    Id = parent.Id,
-                    Name = parent.Name,
-                    IsExpanded = true,
-                    IsAffiliateLoaded = false,
-                    HasChild = true,
-                    Parent = await GetParent(parentDB),
-                };
-        }
-        else 
-        {
-            Console.WriteLine("2");
-            return new NavalUnitModel()
-                {
-                    Id = navalUnitModel.Id,
-                    Name = navalUnitModel.Name,
-                    IsExpanded = true,
-                    IsAffiliateLoaded = false,
-                    HasChild = true,
-                    Parent = null,
-                };
-        }
-    }
-
 
     public async Task SelectNavalUnit(NavalUnitModel unit)
     {
@@ -192,6 +144,7 @@
             StateHasChanged();
         }
         parentNode.IsExpanded = expaned;
+        NavalTreeManagerService.NavalUnits = NavalUnits;
     }
 
     private void OpenCreateNewNavalUnitForm(NavalUnitModel? parent = null)
@@ -271,6 +224,7 @@
         }
 
         IsCreatingNavalUnit = false;
+        NavalTreeManagerService.NavalUnits = NavalUnits;
         StateHasChanged();
     }
 
@@ -305,6 +259,7 @@
             }
 
             Snackbar.Add(result.Message, Severity.Success);
+            NavalTreeManagerService.NavalUnits = NavalUnits;
             StateHasChanged();
         }
     }
