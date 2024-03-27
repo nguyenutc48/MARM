@@ -12,9 +12,7 @@ public class ApplicationDbContext : DbContext
 
     public ApplicationDbContext(DbContextOptions options) : base(options) { }
 
-
     public async Task<IEnumerable<NavalUnit>> GetNavalUnits(Guid parentId) => await NavalUnits.Where(u => u.ParentId == parentId).ToListAsync();
-    public async Task<NavalUnit> GetNavalUnit(Guid parentId) => await NavalUnits.Where(u => u.ParentId == parentId).FirstOrDefaultAsync();
 
     public async Task<Result<NavalUnit>> CreateNavalUnit(Guid parentId, string name)
     {
@@ -221,7 +219,7 @@ public class ApplicationDbContext : DbContext
     {
         var config = new AppConfig();
         config = await AppConfigs.FirstOrDefaultAsync();
-        if (config == null) return null;
+        if (config == null) return new AppConfig();
         return config;
     }
 
