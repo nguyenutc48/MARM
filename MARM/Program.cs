@@ -14,7 +14,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 
 builder.Services.Configure<IDataSettingService>(
-    builder.Configuration.GetSection("AppOptions"));
+    builder.Configuration.GetSection("DataSetting"));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {

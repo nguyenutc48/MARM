@@ -23,4 +23,15 @@
 @code {
     private NavalUnitModel? SelectedNavalUnit { get; set; }
     private NavalMission? SelectedNavalMission { get; set; }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (NavalTreeManagerService.SelectedNavalUnit != null)
+        {
+            NavalTreeManagerService.SelectedNavalUnit.IsExpanded = true;
+            NavalTreeManagerService.SelectedNavalUnit.IsSelected = true;
+            SelectedNavalUnit = NavalTreeManagerService.SelectedNavalUnit;
+        }
+        // if (NavalTreeManagerService.SelectedNavalMission != null) SelectedNavalMission = NavalTreeManagerService.SelectedNavalMission;
+    }
 }

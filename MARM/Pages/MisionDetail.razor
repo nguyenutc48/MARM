@@ -32,7 +32,7 @@
 
 <div class="w-100 h-100 position-relative overflow-hidden">
     <div class="w-100 h-100 position-absolute top-0 start-0 overflow-hidden d-flex flex-row">
-        <div class="w-50 h-100 p-2 d-flex flex-column">
+        <div class="w-50 h-100 p-2">
             <div class="w-100 d-flex flex-row align-items-center">
                 <img src="images/boat.png" height="150" alt="device" />
                 <img src="images/wifi.png" height="50" style="transform: rotate(90deg);" alt="wifi" />
@@ -40,47 +40,6 @@
                 <img src="images/wifi.png" height="50" style="transform: rotate(-90deg);" alt="wifi" />
                 <img src="images/Picture2.png" height="100" alt="computer" />
             </div>
-            <div class="flex-grow-1 d-flex flex-column">
-                <div class="d-flex justify-content-center">
-                    <MudText Typo="Typo.h6">Mặt hứng đạn chính</MudText>
-                </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
-                    <MatHungDan Index="1" ShotCount="@ShotCountAt1" />
-                    <MatHungDan Index="2" ShotCount="@ShotCountAt2" />
-                    <MatHungDan Index="3" ShotCount="@ShotCountAt3" />
-                    <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
-                </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
-                    <MatHungDan Index="5" ShotCount="@ShotCountAt5" />
-                    <MatHungDan Index="6" ShotCount="@ShotCountAt6" />
-                    <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
-                    <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
-                </div>
-            </div>
-            <div class="flex-grow-1 d-flex flex-column">
-                <div class="d-flex justify-content-center">
-                    <MudText Typo="Typo.h6">Mặt hứng đạn phụ</MudText>
-                </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
-                    <MatHungDan Index="9" ShotCount="@ShotCountAt9" />
-                    <MatHungDan Index="10" ShotCount="@ShotCountAt10" />
-                    <MatHungDan Index="11" ShotCount="@ShotCountAt11" />
-                    <MatHungDan Index="12" ShotCount="@ShotCountAt12" />
-                </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
-                    <MatHungDan Index="13" ShotCount="@ShotCountAt13" />
-                    <MatHungDan Index="14" ShotCount="@ShotCountAt14" />
-                    <MatHungDan Index="15" ShotCount="@ShotCountAt15" />
-                    <MatHungDan Index="16" ShotCount="@ShotCountAt16" />
-                </div>
-            </div>
-            <div class="d-flex flex-row-reverse">
-                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary" Style="text-transform:none" Disabled="@ViewDetailDisable" OnClick="ViewDetail">
-                    Xem chi tiết
-                </MudButton>
-            </div>
-        </div>
-        <div class="w-50 h-100 p-2">
             <MudCard Elevation="6">
                 <MudCardHeader Class="align-items-center">
                     <CardHeaderContent>
@@ -125,13 +84,13 @@
                          </HeaderContent>
                          <RowTemplate>
                              <MudTd DataLabel="STT" Style="text-align: center">@context.Index</MudTd>
-                             <MudTd DataLabel="Đơn vị tàu">@context.Name</MudTd>
-                             <MudTd DataLabel="Kết quả" Style="text-align: center">@context.ShotTotal viên</MudTd>
-                             <MudTd DataLabel="Ghi chú">@context.Note</MudTd>
-                             <MudTd Style="text-align: right;">
-                                 <div class="d-flex flex-row">
-                                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.RemoveRedEye" />
-                                     @if (CanBeDeteleRecord)
+                                <MudTd DataLabel="Đơn vị tàu">@context.Name</MudTd>
+                                <MudTd DataLabel="Kết quả" Style="text-align: center">@context.ShotTotal viên</MudTd>
+                            <MudTd DataLabel="Ghi chú">@context.Note</MudTd>
+                                <MudTd Style="text-align: right;">
+                                    <div class="d-flex flex-row">
+                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.RemoveRedEye" />
+                                        @if (CanBeDeteleRecord)
                                     {
                                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteBoatUnitMissionResult(context))" />
                                     }
@@ -140,30 +99,72 @@
                         </RowTemplate>
                         <RowEditingTemplate>
                             <MudTd DataLabel="STT" Style="text-align: center">@context.Index</MudTd>
-                            <MudTd DataLabel="Đơn vị tàu">
-                                <MudTextField Margin="Margin.Dense" @bind-Value="@context.Name" Required />
+                                <MudTd DataLabel="Đơn vị tàu">
+                                    <MudTextField Margin="Margin.Dense" @bind-Value="@context.Name" Required />
                              </MudTd>
                              <MudTd DataLabel="Kết quả">@context.ShotTotal viên</MudTd>
-                             <MudTd DataLabel="Ghi chú">
-                                 <MudTextField Margin="Margin.Dense" @bind-Value="@context.Note" />
-                             </MudTd>
-                         </RowEditingTemplate>
-                         <PagerContent>
-                             <MudTablePager />
-                         </PagerContent>
-                     </MudTable>
-                 </MudCardContent>
-                 <MudCardActions Class="@CardActionClass">
-                     <div class="w-100 d-flex flex-row">
-                         <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Label="Tên đơn vị tàu" @bind-Value="@BoatUnitName" ReadOnly="@IsCreatingBoatUnitMission" />
-                         <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Lines="3" Class="ms-5" Label="Ghi chú" @bind-Value="@BoatUnitNote" ReadOnly="@IsCreatingBoatUnitMission" />
-                         <div>
-                             <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ms-5" OnClick="AddNewBoatUnitMissionResult" Disabled="@IsCreatingBoatUnitMission">Thêm đơn vị tàu</MudButton>
-                         </div>
-                     </div>
-                 </MudCardActions>
-             </MudCard>
-         </div>
+                            <MudTd DataLabel="Ghi chú">
+                                <MudTextField Margin="Margin.Dense" @bind-Value="@context.Note" />
+                            </MudTd>
+                        </RowEditingTemplate>
+                        <PagerContent>
+                            <MudTablePager />
+                        </PagerContent>
+                    </MudTable>
+                </MudCardContent>
+                <MudCardActions Class="@CardActionClass">
+                    <div class="w-100 d-flex flex-row">
+                        <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Label="Tên đơn vị tàu" @bind-Value="@BoatUnitName" ReadOnly="@IsCreatingBoatUnitMission" />
+                        <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Lines="1" Class="ms-5" Label="Ghi chú" @bind-Value="@BoatUnitNote" ReadOnly="@IsCreatingBoatUnitMission" />
+                        <div>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ms-5" OnClick="AddNewBoatUnitMissionResult" Disabled="@IsCreatingBoatUnitMission">Thêm đơn vị tàu</MudButton>
+                        </div>
+                    </div>
+                </MudCardActions>
+            </MudCard>
+        </div>
+        <div class="w-50 h-100 p-2 d-flex flex-column">
+
+            <div class="flex-grow-1 d-flex flex-column">
+                <div class="d-flex justify-content-center">
+                    <MudText Typo="Typo.h6">Mặt hứng đạn chính</MudText>
+                </div>
+                <div class="flex-grow-1 d-flex flex-row mt-1">
+                    <MatHungDan Index="1" ShotCount="@ShotCountAt1" />
+                    <MatHungDan Index="2" ShotCount="@ShotCountAt2" />
+                    <MatHungDan Index="3" ShotCount="@ShotCountAt3" />
+                    <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
+                </div>
+                <div class="flex-grow-1 d-flex flex-row mt-1">
+                    <MatHungDan Index="5" ShotCount="@ShotCountAt5" />
+                    <MatHungDan Index="6" ShotCount="@ShotCountAt6" />
+                    <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
+                    <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
+                </div>
+            </div>
+            <div class="flex-grow-1 d-flex flex-column">
+                <div class="d-flex justify-content-center">
+                    <MudText Typo="Typo.h6">Mặt hứng đạn phụ</MudText>
+                </div>
+                <div class="flex-grow-1 d-flex flex-row mt-1">
+                    <MatHungDan Index="9" ShotCount="@ShotCountAt9" />
+                    <MatHungDan Index="10" ShotCount="@ShotCountAt10" />
+                    <MatHungDan Index="11" ShotCount="@ShotCountAt11" />
+                    <MatHungDan Index="12" ShotCount="@ShotCountAt12" />
+                </div>
+                <div class="flex-grow-1 d-flex flex-row mt-1">
+                    <MatHungDan Index="13" ShotCount="@ShotCountAt13" />
+                    <MatHungDan Index="14" ShotCount="@ShotCountAt14" />
+                    <MatHungDan Index="15" ShotCount="@ShotCountAt15" />
+                    <MatHungDan Index="16" ShotCount="@ShotCountAt16" />
+                </div>
+            </div>
+            <div class="d-flex flex-row-reverse">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary" Style="text-transform:none" Disabled="@ViewDetailDisable" OnClick="ViewDetail">
+                    Xem chi tiết
+                </MudButton>
+            </div>
+        </div>
      </div>
  </div>
 
