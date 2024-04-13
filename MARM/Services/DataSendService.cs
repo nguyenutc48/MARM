@@ -24,6 +24,7 @@ namespace MARM.Services
         { 
             if(buffer.Length<6) return;
             byte[] dataReceived = buffer;// ReceivedFrame(buffer);
+            
             if (dataReceived.Length != 0 && dataReceived != null)
             {
                 var commandType = dataReceived[3];

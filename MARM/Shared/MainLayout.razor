@@ -15,13 +15,20 @@
 <PageTitle>MARM</PageTitle>
 
 <div class="w-100 h-100 d-flex flex-column">
-    <header class="d-flex flex-column align-items-center">
+    <header class="d-flex flex-column align-items-center ">
         <img class="w-100 h-100" src="images/Picture1.png" />
-        <h2 class="my-1 w-auto fw-bold">MÁY TÍNH TRUNG TÂM GIÁM SÁT KẾT QUẢ BẮN PHÁO TRÊN BIỂN</h2>
-
+        <MudGrid>
+            <MudItem Class="d-flex justify-center flex-grow-1">
+                <h2 class="my-1 w-auto fw-bold text-center">MÁY TÍNH TRUNG TÂM GIÁM SÁT KẾT QUẢ BẮN PHÁO TRÊN BIỂN</h2>
+            </MudItem>
+            <MudItem Class="my-auto">
+                <MudIconButton @onclick="MinimizeApp" Icon="@Icons.Material.Filled.Minimize" Color="Color.Primary" />
+                <MudIconButton @onclick="CloseApp" Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+            </MudItem>
+        </MudGrid>
     </header>
     <main>
-        <div>
+        <div class="w-100">
             @Body
         </div>
     </main>
@@ -30,6 +37,7 @@
             <MudIconButton @onclick="NavigateBack" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
         </div>
         <div class="d-flex flex-row align-items-center">
+
             <div class="nav-item">
                 <NavLink @onclick="DashboardClick" class="nav-link" href="/dashboard">
                     <span class="mdi mdi-view-dashboard mdi-24px" aria-hidden="true"></span> Dashboard
@@ -50,10 +58,7 @@
                     <span class="mdi mdi-ship-wheel mdi-24px" aria-hidden="true"></span> Quản lý đơn vị
                 </NavLink>
             </div>
-            <!-- Thêm nút close -->
-            <div class="nav-item">
-                <MudIconButton @onclick="CloseApp" Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
-            </div>
+
         </div>
 
         <div>
@@ -67,35 +72,44 @@
 <MudSnackbarProvider />
 
 @code {
-    private List<string> navLinks = new List<string> { "dashboard", "setting", "checklist", "navalunits" };
+    // private List<string> navLinks { get; set; }
     private List<int> outputPin = new List<int> { 4, 3, 2, 1 };
-    private int currentLinkIndex = 0;
+    // private int currentLinkIndex = 0;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        pageNavi.PageChanged += HandlePageChanged;
-        pageNavi.TotalPage = 4;
+        // pageNavi.PageChanged += HandlePageChanged;
+        pageNavi.PageNameChanged += HandlePageNameChanged;
+
         if (comService.IsConnected())
         {
-            pageNavi.NavigateTo(0);
+            pageNavi.NavigateTo("dashboard");
             Snackbar.Add("Kết nối thành công!", Severity.Success);
         }
         else
         {
-            pageNavi.NavigateTo(1);
+            pageNavi.NavigateTo("setting");
             Snackbar.Add("Không thể kết nối đến cổng COM!", Severity.Error);
         }
-        
+
     }
 
+    // private void HandlePageChanged(int pageIndex)
+    // {
+    //     _ = InvokeAsync(() =>
+    //     {
+    //         NavigateToLink(navLinks[pageIndex]);
+    //         StateHasChanged();
+    //     });
+    // }
 
-    private void HandlePageChanged(int pageIndex)
+    private void HandlePageNameChanged(string pageName)
     {
         _ = InvokeAsync(() =>
         {
-            NavigateToLink(navLinks[pageIndex]);
-            // if(pageIndex == 0) dataSender.RemoteUpdateStatus();
+            Console.WriteLine(pageName);
+            naviManger.NavigateTo(pageName.Trim());
             StateHasChanged();
         });
     }
@@ -112,10 +126,9 @@
 
     private void NavigateToLink(string link)
     {
-        currentLinkIndex = navLinks.IndexOf(link);
+        // currentLinkIndex = navLinks.IndexOf(link);
         naviManger.NavigateTo(link);
     }
-
 
     // Phương thức đóng ứng dụng
     private void CloseApp()
@@ -123,28 +136,30 @@
         Electron.WindowManager.BrowserWindows.First().Close();
     }
 
+    private void MinimizeApp()
+    {
+        Electron.WindowManager.BrowserWindows.First().Minimize();
+    }
+
     public void Dispose()
     {
-        pageNavi.PageChanged -= HandlePageChanged;
+        pageNavi.PageNameChanged -= HandlePageNameChanged;
     }
-    private void DataClick()
+    private  void DataClick()
     {
-        pageNavi.NavigateTo(3);
+        pageNavi.NavigateTo("navalunits");
     }
-    private void DashboardClick()
+    private  void DashboardClick()
     {
-        pageNavi.NavigateTo(0);
-
+        pageNavi.NavigateTo("dashboard");
     }
-    private void SettingClick()
+    private  void SettingClick()
     {
-        pageNavi.NavigateTo(1);
-
+        pageNavi.NavigateTo("setting");
     }
     private void CheckClick()
     {
-        pageNavi.NavigateTo(2);
-
+        pageNavi.NavigateTo("");
     }
 }
 

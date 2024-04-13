@@ -307,7 +307,7 @@
         if (comService.IsConnected()) 
         { 
             EditComPort = false; Snackbar.Add("Đã kết nối thành công", Severity.Success);
-            pageNavi.NavigateTo(0);
+            pageNavi.NavigateTo("dashboard");
             UpdateComPort();
         }
         else

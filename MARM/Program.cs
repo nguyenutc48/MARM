@@ -66,8 +66,8 @@ await app.StartAsync();
 // Open the Electron-Window here
 await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions()
 {
-    Width = 1920,
-    Height = 1080,
+    Width = 1600,//1920,
+    Height = 900,//1080,
     Fullscreenable = true,
     Fullscreen = true,
     AcceptFirstMouse = true,

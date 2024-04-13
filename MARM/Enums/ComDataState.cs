@@ -24,14 +24,44 @@
         Shot = 0x01,
         AddList = 0x02,
         StopShot = 0x03,
-        BackShot = 0x04,
-
+        BackShot = 0x13,
+        PrevShot = 0x04,
         PrevPage = 0x05,
         BackPage = 0x06,
         Home = 0x07,
-        Setting = 0x0C,
-        Data = 0x0D,
-        ShotResult = 0x0E,
-        PrevShot = 0x0F,
+        Setting = 0x10,
+        Data = 0x11,
+        ShotResult = 0x12,
+    }
+
+    public enum Light : int
+    {
+        ErrorConfirm = 11,
+        Shot = 10,
+        AddList = 9,
+        StopShot = 8,
+        BackShot = 0,
+        PrevShot = 7,
+        PrevPage = 6,
+        BackPage = 5,
+        Home = 4,
+        Setting = 3,
+        Data = 12,
+        ShotResult = 1,
+    }
+    public enum Page : int
+    {
+        ErrorConfirm = 11,
+        Shot = 10,
+        AddList = 9,
+        StopShot = 8,
+        BackShot = 0,
+        PrevShot = 7,
+        PrevPage = 6,
+        BackPage = 5,
+        Home = 0,
+        Setting = 1,
+        Data = 2,
+        ShotResult = 3,
     }
 }

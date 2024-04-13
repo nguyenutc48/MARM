@@ -1,4 +1,5 @@
 ﻿using ElectronNET.API.Entities;
+using MARM.Components.DashboardComponents;
 using MARM.Data;
 using MARM.Enums;
 using Microsoft.AspNetCore.Components;
@@ -26,11 +27,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     private int _pageIndex;
 
     public event Action<int>? PageChanged;
-    public int TotalPage { get; set; }
+    public event Action<string>? PageNameChanged;
 
-    //private Dictionary<int, int> _pageNames = new Dictionary<int, int> { { (int)ButtonMode.Home, 0 }, { (int)ButtonMode.Setting, 1 }, { (int)ButtonMode.Data, 2 }, { (int)ButtonMode.ShotResult, 3 } };
-    private byte[] _pageNameIndexs = { (byte)ButtonMode.Home, (byte)ButtonMode.Setting, (byte)ButtonMode.Data , (byte)ButtonMode.ShotResult };
-    
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
     public bool Light3 { get; private set; }
@@ -38,6 +36,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public NavalUnitModel? SelectedNavalUnit { get; set; }
     public HashSet<NavalUnitModel>? NavalUnits { get; set; }
     public NavalMission? SelectedNavalMission { get; set; }
+    public List<ButtonLightPageModel> ButtonLightPages { get; set; }
 
     private DataSendService _dataSendService;
 
@@ -51,16 +50,49 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         BatteryLevel1 = 50;
         BatteryLevel2 = 50;
         _pageIndex = 0;
+        ButtonLightPages = new List<ButtonLightPageModel>() { 
+            new ButtonLightPageModel {Index = 1,  PageName = "dashboard",   ButtonAddr = (int)ButtonMode.Home,          LightAddr = (int)Light.Home         },
+            new ButtonLightPageModel {Index = 2,  PageName = "setting",     ButtonAddr = (int)ButtonMode.Setting,       LightAddr = (int)Light.Setting      },
+            new ButtonLightPageModel {Index = 3,  PageName = "navalunits",  ButtonAddr = (int)ButtonMode.Data,          LightAddr = (int)Light.Data         },
+            new ButtonLightPageModel {Index = 4,  PageName = "",            ButtonAddr = (int)ButtonMode.ShotResult,    LightAddr = (int)Light.ShotResult,  },
+            new ButtonLightPageModel {Index = 5,  PageName = "",            ButtonAddr = (int)ButtonMode.PrevPage,      LightAddr = (int)Light.PrevPage,    },
+            new ButtonLightPageModel {Index = 6,  PageName = "",            ButtonAddr = (int)ButtonMode.BackPage,      LightAddr = (int)Light.BackPage,    },
+            new ButtonLightPageModel {Index = 7,  PageName = "",            ButtonAddr = (int)ButtonMode.PrevShot,      LightAddr = (int)Light.PrevShot,    },
+            new ButtonLightPageModel {Index = 8,  PageName = "",            ButtonAddr = (int)ButtonMode.BackShot,      LightAddr = (int)Light.BackShot,    },
+            new ButtonLightPageModel {Index = 9,  PageName = "",            ButtonAddr = (int)ButtonMode.Shot,          LightAddr = (int)Light.Shot,        },
+            new ButtonLightPageModel {Index = 10, PageName = "",            ButtonAddr = (int)ButtonMode.AddList,       LightAddr = (int)Light.AddList,     },
+            new ButtonLightPageModel {Index = 11, PageName = "",            ButtonAddr = (int)ButtonMode.StopShot,      LightAddr = (int)Light.StopShot,    },
+            new ButtonLightPageModel {Index = 12, PageName = "",            ButtonAddr = (int)ButtonMode.ErrorConfirm,  LightAddr = (int)Light.ErrorConfirm,},
+        };
     }
 
     private void _dataSendService_ButtonReceived(byte buttonAddress)
     {
-        if (buttonAddress == (byte)ButtonMode.Home) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Home));
-        if (buttonAddress == (byte)ButtonMode.Setting) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Setting));
-        if (buttonAddress == (byte)ButtonMode.Data) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.Data));
-        if (buttonAddress == (byte)ButtonMode.ShotResult) NavigateTo(Array.IndexOf(_pageNameIndexs, (byte)ButtonMode.ShotResult));
-        if (buttonAddress == (byte)ButtonMode.PrevPage) NavigateForward();
-        if (buttonAddress == (byte)ButtonMode.BackPage) NavigateBack();
+        var pageExist = ButtonLightPages.FirstOrDefault(p=>p.ButtonAddr == buttonAddress);
+        if (pageExist != null)
+        {
+            if(!string.IsNullOrEmpty(pageExist.PageName))
+            {
+                NavigateTo(pageExist.PageName.Trim());
+            }
+        }
+    }
+
+    private async void ButtonLightControl(int buttonAddress)
+    {
+
+        foreach (var button in ButtonLightPages)
+        {
+            if(button.ButtonAddr == buttonAddress)
+            {
+                await _dataSendService.LightControl(button.LightAddr, true);
+            }
+            else
+            {
+                await _dataSendService.LightControl(button.LightAddr, false);
+            }
+            await Task.Delay(100);
+        }
     }
 
     private void _dataSendService_RemoteStateReceived(byte[] data)
@@ -169,64 +201,35 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     
     #region NextPage
-    private List<int> pageLightCode = new List<int> { 4,3,2,1};
-    public async void NavigateTo(int pageIndex)
-    {
-        await Task.Yield();
 
-        if (pageIndex < 0 || pageIndex > TotalPage) _pageIndex = 0;
-        else _pageIndex = pageIndex;
-        PageChanged?.Invoke(_pageIndex);
-        for (int i = 0; i < pageLightCode.Count; i++)
+
+    public void NavigateTo(string pageName)
+    {
+        if (pageName == "")
         {
-            if (i == pageIndex)
-                await _dataSendService.LightControl(pageLightCode[i], true);
-            else
-                await _dataSendService.LightControl(pageLightCode[i], false);
+            ButtonLightControl(99);
         }
-        await Task.Delay(1000);
-        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
+        else
+        {
+            var page = ButtonLightPages.FirstOrDefault(p => p.PageName == pageName);
+            if (page != null)
+            {
+                PageNameChanged?.Invoke(pageName);
+                ButtonLightControl(page.ButtonAddr);
+            }
+        }
     }
+
 
     public async void NavigateBack()
     {
         await Task.Yield();
-
-        if (_pageIndex == 0)
-        {
-            _pageIndex = TotalPage - 1; 
-        }
-        else
-        {
-            _pageIndex--;
-        }
-        PageChanged?.Invoke(_pageIndex);
-        for (int i = 0; i < pageLightCode.Count; i++)
-        {
-            if (i == _pageIndex)
-                await _dataSendService.LightControl(pageLightCode[i], true);
-            else
-                await _dataSendService.LightControl(pageLightCode[i], false);
-        }
-        await Task.Delay(1000);
-        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
 
     public async void NavigateForward()
     {
         await Task.Yield();
-
-        _pageIndex = (_pageIndex + 1) % TotalPage;
-        PageChanged?.Invoke(_pageIndex);
-        for (int i = 0; i < pageLightCode.Count; i++)
-        {
-            if (i == _pageIndex)
-                await _dataSendService.LightControl(pageLightCode[i], true);
-            else
-                await _dataSendService.LightControl(pageLightCode[i], false);
-        }
-        await Task.Delay(1000);
-        if (_pageIndex == 0) await _dataSendService.RemoteUpdateStatus();
     }
     #endregion
 }
+

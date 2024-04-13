@@ -19,7 +19,13 @@
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    @* <component type="typeof(App)" render-mode="ServerPrerendered" /> *@
+    <environment include="Staging,Production">
+        <component render-mode="ServerPrerendered" type="typeof(App)" />
+    </environment>
+    <environment include="Development">
+        <component render-mode="Server" type="typeof(App)" />
+    </environment>
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
