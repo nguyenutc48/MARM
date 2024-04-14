@@ -24,8 +24,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public event Action<int, bool>? LightStateChanged;
 
-    private int _pageIndex;
-
     public event Action<int>? PageChanged;
     public event Action<string>? PageNameChanged;
 
@@ -45,11 +43,11 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         _dataSendService = dataSendService;
         _dataSendService.RemoteStateReceived += _dataSendService_RemoteStateReceived;
         _dataSendService.ButtonReceived += _dataSendService_ButtonReceived;
+        _dataSendService.LeakStateReceived += _dataSendService_LeakStateReceived;
         MainTargetConnectState = TargetConnectState.Lost;
         SubTargetConnectState = TargetConnectState.Lost;
         BatteryLevel1 = 50;
         BatteryLevel2 = 50;
-        _pageIndex = 0;
         ButtonLightPages = new List<ButtonLightPageModel>() { 
             new ButtonLightPageModel {Index = 1,  PageName = "dashboard",   ButtonAddr = (int)ButtonMode.Home,          LightAddr = (int)Light.Home         },
             new ButtonLightPageModel {Index = 2,  PageName = "setting",     ButtonAddr = (int)ButtonMode.Setting,       LightAddr = (int)Light.Setting      },
@@ -66,8 +64,17 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         };
     }
 
-    private void _dataSendService_ButtonReceived(byte buttonAddress)
+    private async void _dataSendService_LeakStateReceived(byte[] obj)
     {
+        await _dataSendService.LightControl((int)Light.ErrorConfirm, true);
+    }
+
+    private async void _dataSendService_ButtonReceived(byte buttonAddress)
+    {
+        if (buttonAddress == (int)ButtonMode.ErrorConfirm)
+        { 
+            await _dataSendService.LightControl((int)Light.ErrorConfirm, false); 
+        }
         var pageExist = ButtonLightPages.FirstOrDefault(p=>p.ButtonAddr == buttonAddress);
         if (pageExist != null)
         {
@@ -83,15 +90,18 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
         foreach (var button in ButtonLightPages)
         {
-            if(button.ButtonAddr == buttonAddress)
+            if (button.LightAddr != (int)Light.ErrorConfirm) 
             {
-                await _dataSendService.LightControl(button.LightAddr, true);
+                if (button.ButtonAddr == buttonAddress)
+                {
+                    await _dataSendService.LightControl(button.LightAddr, true);
+                }
+                else
+                {
+                    await _dataSendService.LightControl(button.LightAddr, false);
+                }
+                await Task.Delay(100);
             }
-            else
-            {
-                await _dataSendService.LightControl(button.LightAddr, false);
-            }
-            await Task.Delay(100);
         }
     }
 

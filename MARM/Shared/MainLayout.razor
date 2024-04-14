@@ -48,8 +48,8 @@
                     <span class="mdi mdi-cog mdi-24px" aria-hidden="true"></span> Setting
                 </NavLink>
             </div>
-            <div class="nav-item">
-                <NavLink @onclick="CheckClick" class="nav-link" href="/checklist">
+            <div class="nav-item" >
+                <NavLink @onclick="CheckClick" class="nav-link" href="/checklist" style="@($"color: {colorButton}; background:{backgroundButton};")">
                     <span class="mdi mdi-playlist-check mdi-24px" aria-hidden="true"></span> Kiểm tra hệ thống
                 </NavLink>
             </div>
@@ -72,15 +72,19 @@
 <MudSnackbarProvider />
 
 @code {
-    // private List<string> navLinks { get; set; }
-    private List<int> outputPin = new List<int> { 4, 3, 2, 1 };
-    // private int currentLinkIndex = 0;
+    private string colorButton { get; set; } = "";
+    private string backgroundButton { get; set; } = "";
+    private bool errorStatus { get; set; } = false;
+    private string currentPageName { get; set; } = "";
+ 
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // pageNavi.PageChanged += HandlePageChanged;
+
         pageNavi.PageNameChanged += HandlePageNameChanged;
+
+        dataSender.LeakStateReceived += HandleLeakStateReceived;
 
         if (comService.IsConnected())
         {
@@ -95,20 +99,35 @@
 
     }
 
-    // private void HandlePageChanged(int pageIndex)
-    // {
-    //     _ = InvokeAsync(() =>
-    //     {
-    //         NavigateToLink(navLinks[pageIndex]);
-    //         StateHasChanged();
-    //     });
-    // }
+    private async void HandleLeakStateReceived(byte[] data)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            _ = InvokeAsync(() =>
+             {
+                 colorButton = "#FFFFFF";
+                 backgroundButton = Colors.DeepOrange.Lighten1;
+                 StateHasChanged();
+             });
+
+            await Task.Delay(500);
+            _ = InvokeAsync(() =>
+            {
+                colorButton = "";
+                backgroundButton = "";
+                StateHasChanged();
+            });
+            await Task.Delay(500);
+        }
+
+
+    }
 
     private void HandlePageNameChanged(string pageName)
     {
         _ = InvokeAsync(() =>
         {
-            Console.WriteLine(pageName);
+            currentPageName = pageName;
             naviManger.NavigateTo(pageName.Trim());
             StateHasChanged();
         });
@@ -122,12 +141,6 @@
     private void NavigateForward()
     {
         pageNavi.NavigateForward();
-    }
-
-    private void NavigateToLink(string link)
-    {
-        // currentLinkIndex = navLinks.IndexOf(link);
-        naviManger.NavigateTo(link);
     }
 
     // Phương thức đóng ứng dụng
