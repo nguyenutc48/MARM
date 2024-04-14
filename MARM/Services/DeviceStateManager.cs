@@ -26,6 +26,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public event Action<int>? PageChanged;
     public event Action<string>? PageNameChanged;
+    private List<string> _pageNames = new List<string>();
 
     public bool Light1 { get; private set; }
     public bool Light2 { get; private set; }
@@ -62,6 +63,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             new ButtonLightPageModel {Index = 11, PageName = "",            ButtonAddr = (int)ButtonMode.StopShot,      LightAddr = (int)Light.StopShot,    },
             new ButtonLightPageModel {Index = 12, PageName = "",            ButtonAddr = (int)ButtonMode.ErrorConfirm,  LightAddr = (int)Light.ErrorConfirm,},
         };
+        _pageNames = ButtonLightPages.Where(p => !string.IsNullOrEmpty(p.PageName)).Select(x=>x.PageName).ToList();
+        Console.WriteLine(_pageNames.Count.ToString());
     }
 
     private async void _dataSendService_LeakStateReceived(byte[] obj)
@@ -81,6 +84,21 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             if(!string.IsNullOrEmpty(pageExist.PageName))
             {
                 NavigateTo(pageExist.PageName.Trim());
+            }
+            else
+            {
+                if(buttonAddress == (int)ButtonMode.PrevPage)
+                {
+                    await _dataSendService.LightControl((int)Light.PrevPage, true);
+                    await Task.Delay(200);
+                    NavigateForward();
+                }
+                if (buttonAddress == (int)ButtonMode.BackPage)
+                {
+                    await _dataSendService.LightControl((int)Light.BackPage, true);
+                    await Task.Delay(200);
+                    NavigateBack();
+                }
             }
         }
     }
@@ -209,10 +227,10 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         }
     }
 
-    
+
     #region NextPage
 
-
+    string oldPageSelected = "";
     public void NavigateTo(string pageName)
     {
         if (pageName == "")
@@ -226,6 +244,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             {
                 PageNameChanged?.Invoke(pageName);
                 ButtonLightControl(page.ButtonAddr);
+                oldPageSelected = page.PageName;
             }
         }
     }
@@ -234,12 +253,29 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public async void NavigateBack()
     {
         await Task.Yield();
+        int pageIndex = 0;
+        
+        if(_pageNames.IndexOf(oldPageSelected) == 0)
+        {
+            pageIndex = _pageNames.Count - 1;
+        }
+        else
+        {
+            pageIndex = _pageNames.IndexOf(oldPageSelected) - 1;
+        }
+        Console.WriteLine(_pageNames[pageIndex]);
+        NavigateTo(_pageNames[pageIndex]);
     }
 
     public async void NavigateForward()
     {
         await Task.Yield();
+
+        var pageIndex = (_pageNames.IndexOf(oldPageSelected) + 1) % _pageNames.Count;
+        Console.WriteLine(_pageNames[pageIndex]);
+        NavigateTo(_pageNames[pageIndex]);
     }
+
     #endregion
 }
 
