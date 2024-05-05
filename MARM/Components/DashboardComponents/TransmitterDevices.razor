@@ -4,7 +4,7 @@
 
 @inject ITransmitterDeviceManager TransmitterDeviceManager
 
-<div class="m-4">
+<div class="m-4" >
     <MudCard Elevation="6">
         <MudCardHeader>
             <CardHeaderContent>
@@ -20,12 +20,12 @@
                         Pin khối phát 1
                     </MudText>
                 </div>
-
-                <MudProgressLinear Color="@BatteryColor1" Striped="true" Size="Size.Large" Value="@BatteryLevel1" Class="ms-5">
+                <NProgressLinear BatteryLevel="BatteryLevel1" />
+                @* <MudProgressLinear Color="@BatteryColor1" Striped="true" Value="@BatteryLevel1" Class="custom-progress">
                     <MudText Typo="Typo.subtitle1" Color="Color.Dark">
                         <b>@(BatteryLevel1)%</b>
                     </MudText>
-                </MudProgressLinear>
+                </MudProgressLinear> *@
             </div>
             <div class="mt-5 d-flex flex-row align-items-center">
                 <div style="width: 250px;">
@@ -33,11 +33,12 @@
                         Pin khối phát 2
                     </MudText>
                 </div>
-                <MudProgressLinear Color="@BatteryColor2" Striped="true" Size="Size.Large" Value="@BatteryLevel2" Class="ms-5">
+                <NProgressLinear BatteryLevel="BatteryLevel2"/>
+                @* <MudProgressLinear Color="@BatteryColor2" Striped="true" Value="@BatteryLevel2" Class="custom-progress">
                     <MudText Typo="Typo.subtitle1" Color="Color.Dark">
                         <b>@(BatteryLevel2)%</b>
                     </MudText>
-                </MudProgressLinear>
+                </MudProgressLinear> *@
             </div>
         </MudCardContent>
     </MudCard>

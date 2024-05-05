@@ -42,7 +42,7 @@ public class DoBackGroud : IHostedService
     private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
 
-        
+        //_deviceStateManager.SetBatteryLevel(random.Next(0, 100), random.Next(0, 100));
     }
 
 
