@@ -4,8 +4,8 @@
 
 @inject ITransmitterDeviceManager TransmitterDeviceManager
 
-<div class="m-4" >
-    <MudCard Elevation="6">
+@* <div class="m-4" > *@
+    <MudCard Elevation="6" Class="h-100">
         <MudCardHeader>
             <CardHeaderContent>
                 <MudText Typo="Typo.h4">
@@ -42,7 +42,7 @@
             </div>
         </MudCardContent>
     </MudCard>
-</div>
+@* </div> *@
 
 @code {
     private int BatteryLevel1 { get; set; }

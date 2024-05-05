@@ -36,3 +36,7 @@
 .progress-bar.blue {
     background-color: #007bff; /* Màu xanh dương cho phần trăm từ 75 đến 100% */
 }
+
+.progress-bar.yellow {
+    background-color: #ffc505; /* Màu xanh dương cho phần trăm từ 75 đến 100% */
+}

@@ -4,8 +4,8 @@
 
 @inject ILightController LightCtl
 
-<div class="m-4">
-    <MudCard Elevation="6">
+@* <div class="m-4"> *@
+    <MudCard Elevation="6" Class="h-100">
         <MudCardHeader>
             <CardHeaderContent>
                 <MudText Typo="Typo.h4">Điều khiển các thiết bị</MudText>
@@ -21,7 +21,7 @@
             </div>
         </MudCardContent>
     </MudCard>
-</div>
+@* </div> *@
 
 @code {
     private int BatteryLevel1 { get; set; } = 50;

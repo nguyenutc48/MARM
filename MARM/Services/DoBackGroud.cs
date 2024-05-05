@@ -12,7 +12,7 @@ public class DoBackGroud : IHostedService
     private readonly IDataSettingService _dataSettingService;
     private readonly System.Timers.Timer _timer = new()
     {
-        Interval = 5000,
+        Interval = 300000,
     };
 
 
@@ -29,7 +29,7 @@ public class DoBackGroud : IHostedService
         _comDataService = comDataService;
         _configuration = configuration;
 
-        _timer.Elapsed += _timer_Elapsed;
+        _timer.Elapsed += _timer_ElapsedAsync;
         _dataSettingService = dataSettingService;
         _dataSettingService.PortChanged += _dataSettingService_PortChanged;
     }
@@ -39,10 +39,11 @@ public class DoBackGroud : IHostedService
         //_comDataService.Open("COM16", 57600);
     }
 
-    private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    private async void _timer_ElapsedAsync(object? sender, System.Timers.ElapsedEventArgs e)
     {
 
         //_deviceStateManager.SetBatteryLevel(random.Next(0, 100), random.Next(0, 100));
+        await _dataSendService.RemoteUpdateStatus();
     }
 
 

@@ -47,8 +47,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
         _dataSendService.LeakStateReceived += _dataSendService_LeakStateReceived;
         MainTargetConnectState = TargetConnectState.Lost;
         SubTargetConnectState = TargetConnectState.Lost;
-        BatteryLevel1 = 50;
-        BatteryLevel2 = 50;
+        BatteryLevel1 = -1;
+        BatteryLevel2 = -1;
         ButtonLightPages = new List<ButtonLightPageModel>() { 
             new ButtonLightPageModel {Index = 1,  PageName = "dashboard",   ButtonAddr = (int)ButtonMode.Home,          LightAddr = (int)Light.Home         },
             new ButtonLightPageModel {Index = 2,  PageName = "setting",     ButtonAddr = (int)ButtonMode.Setting,       LightAddr = (int)Light.Setting      },

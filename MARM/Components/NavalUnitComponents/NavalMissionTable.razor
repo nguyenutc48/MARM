@@ -24,7 +24,7 @@
 
 <MudTable Class="@TableVisible" T="NavalMission" Items="Missions" SelectedItem="@SelectedNavalMission"
           SelectedItemChanged="OnSelectedItemChanged" RowClassFunc="@SelectedRowClassFunc"
-          Height="575px" Elevation="6" Hover>
+          Elevation="6" Hover>
     <ToolBarContent>
         <div class="w-100 d-flex flex-row justify-content-between align-items-center">
             <MudText> Danh sách nhiệm vụ của đơn vị <b>@UnitName</b></MudText>
@@ -107,7 +107,7 @@
     private List<NavalMission> Missions { get; set; } = new List<NavalMission>();
     private string searchString = "";
     private string UnitName => NavalUnit?.Name ?? "";
-    private string TableVisible => NavalUnit is null ? "d-none" : "";
+    private string TableVisible => NavalUnit is null ? "d-none" : "h-100";
 
     private bool IsCreateNavalMissionFormVisible { get; set; }
     private bool IsCreatingNavalMission { get; set; }

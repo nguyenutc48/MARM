@@ -1,20 +1,29 @@
 ﻿<div class="progress-container">
     <div class="progress-bar @GetProgressBarColor()" style="width: @(BatteryLevel)%;">
-        <span class="progress-text">@BatteryLevel%</span>
+        <span class="progress-text">@GetText()</span>
     </div>
 </div>
 
 @code {
     [Parameter]public int BatteryLevel { get; set; }
+    string GetText()
+    {
+        if (BatteryLevel < 0)
+            return "Không sử dụng";
+        else
+            return BatteryLevel.ToString() + "%";
+    }
     string GetProgressBarColor()
     {
-        if (BatteryLevel <= 25)
+        if (BatteryLevel <= 25 && BatteryLevel >=0)
             return "red";
-        else if (BatteryLevel <= 50)
+        else if (BatteryLevel <= 50 && BatteryLevel >= 0)
             return "orange";
-        else if (BatteryLevel <= 75)
+        else if (BatteryLevel <= 75 && BatteryLevel >= 0)
             return "green";
-        else
+        else if (BatteryLevel <= 100 && BatteryLevel >= 0)
             return "blue";
+        else
+            return "yellow";
     }
 }

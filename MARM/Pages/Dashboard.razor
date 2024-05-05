@@ -32,7 +32,43 @@
     </div>
 
 </div> *@
-<MudGrid Justify="Justify.Center">
+
+<div class="w-100 h-100 d-flex flex-column flex-grow-1">
+    <div class="w-100 d-flex flex-row flex-grow-1">
+        <div class="h-100 p-2" style="width: 50%;">
+            <MudCard Class="" Elevation="6">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Kiểm tra tình trạng kết nối</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex flex-row flex-grow-1 gap-4">
+                    <MainTargetCard />
+                    <SubTargetCard />
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="flex-grow-1 h-100 p-2">
+            <div class="flex-grow-1 p-2 d-flex flex-row align-items-center">
+                <img src="images/Picture2.png" height="200" alt="device" />
+                <img src="images/wifi.png" height="70" style="transform: rotate(90deg);" alt="wifi" />
+                <div class="bg-connect"></div>
+                <img src="images/wifi.png" height="70" style="transform: rotate(-90deg);" alt="wifi" />
+                <img src="images/computer.png" height="200" alt="computer" />
+            </div>
+        </div>
+    </div>
+    <div class="w-100  h-100 position-relative d-flex flex-row flex-grow-1">
+        <div class="h-100 p-2" style="width: 50%;">
+            <LightController />
+        </div>
+        <div class="flex-grow-1 h-100 p-2">
+            <TransmitterDevices />
+        </div>
+    </div>
+</div>
+
+@* <MudGrid Justify="Justify.Center">
     <MudItem xs="12">
         <MudGrid Justify="Justify.SpaceBetween">
             <MudItem xs="6">
@@ -69,7 +105,7 @@
             </MudItem>
         </MudGrid>
     </MudItem>
-</MudGrid>
+</MudGrid> *@
 
 @code {
 
