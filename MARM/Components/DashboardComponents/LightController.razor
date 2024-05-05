@@ -4,24 +4,24 @@
 
 @inject ILightController LightCtl
 
-@* <div class="m-4"> *@
-    <MudCard Elevation="6" Class="h-100">
-        <MudCardHeader>
-            <CardHeaderContent>
-                <MudText Typo="Typo.h4">Điều khiển các thiết bị</MudText>
-            </CardHeaderContent>
-        </MudCardHeader>
-        <MudCardContent Class="d-flex flex-row align-items-center">
-            <img src="images/Picture2.png" alt="device" />
-            <div class="d-flex flex-column mx-5">
-                <LightButton Label="Bật/Tắt Đèn 1" State=@LightStates[0] Click="ToggleLight1" />
-                <LightButton Label="Bật/Tắt Đèn 2" State=@LightStates[1] Click="ToggleLight2" />
-                <LightButton Label="Bật/Tắt Đèn 3" State=@LightStates[2] Click="ToggleLight3" />
-                <LightButton Label="Bật/Tắt Đèn 4" State=@LightStates[3] Click="ToggleLight4" />
-            </div>
-        </MudCardContent>
-    </MudCard>
-@* </div> *@
+
+<MudCard Elevation="6" Class="h-100">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h4">Điều khiển các thiết bị</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Class="d-flex flex-row align-items-center">
+        <img src="images/Picture2.png" alt="device" />
+        <div class="d-flex flex-column mx-5">
+            <LightButton Label="Bật/Tắt Đèn 1" State=@LightStates[0] Click="ToggleLight1" />
+            <LightButton Label="Bật/Tắt Đèn 2" State=@LightStates[1] Click="ToggleLight2" />
+            <LightButton Label="Bật/Tắt Đèn 3" State=@LightStates[2] Click="ToggleLight3" />
+            <LightButton Label="Bật/Tắt Đèn 4" State=@LightStates[3] Click="ToggleLight4" />
+        </div>
+    </MudCardContent>
+</MudCard>
+
 
 @code {
     private int BatteryLevel1 { get; set; } = 50;
