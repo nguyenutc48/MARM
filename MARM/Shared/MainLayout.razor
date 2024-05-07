@@ -80,7 +80,7 @@
     private string backgroundButton { get; set; } = "";
     private bool errorStatus { get; set; } = false;
     private string currentPageName { get; set; } = "";
- 
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,6 +93,7 @@
         if (comService.IsConnected())
         {
             pageNavi.NavigateTo("dashboard");
+            
             Snackbar.Add("Kết nối thành công!", Severity.Success);
         }
         else

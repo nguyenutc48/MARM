@@ -308,6 +308,7 @@
         { 
             EditComPort = false; Snackbar.Add("Đã kết nối thành công", Severity.Success);
             pageNavi.NavigateTo("dashboard");
+            await dataSender.RemoteUpdateStatus();
             UpdateComPort();
         }
         else

@@ -24,6 +24,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     public event Action<int, bool>? LightStateChanged;
 
+    public event Action<string>? ShotButtonPushed;
+
     public event Action<int>? PageChanged;
     public event Action<string>? PageNameChanged;
     private List<string> _pageNames = new List<string>();
@@ -36,6 +38,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public HashSet<NavalUnitModel>? NavalUnits { get; set; }
     public NavalMission? SelectedNavalMission { get; set; }
     public List<ButtonLightPageModel> ButtonLightPages { get; set; }
+    public string MissionUrl { get; set; } = "";
 
     private DataSendService _dataSendService;
 
@@ -74,6 +77,25 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private async void _dataSendService_ButtonReceived(byte buttonAddress)
     {
+        if (buttonAddress == (int)ButtonMode.Shot)
+        {
+            if(MissionUrl != "")
+            {
+                Console.WriteLine(MissionUrl);
+                ButtonLightControl(buttonAddress);
+                ShotButtonPushed.Invoke(MissionUrl);
+            }
+            else
+            {
+                Console.WriteLine("url null");
+                var pageNal = ButtonLightPages.FirstOrDefault(p => p.ButtonAddr == (int)ButtonMode.Data);
+                if (pageNal != null)
+                {
+                    NavigateTo(pageNal.PageName.Trim());
+                }
+            }
+            
+        }
         if (buttonAddress == (int)ButtonMode.ErrorConfirm)
         { 
             await _dataSendService.LightControl((int)Light.ErrorConfirm, false); 

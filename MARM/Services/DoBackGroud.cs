@@ -12,7 +12,8 @@ public class DoBackGroud : IHostedService
     private readonly IDataSettingService _dataSettingService;
     private readonly System.Timers.Timer _timer = new()
     {
-        Interval = 300000,
+        Interval = 60000,
+        //Interval = 300000,
     };
 
 
@@ -41,15 +42,15 @@ public class DoBackGroud : IHostedService
 
     private async void _timer_ElapsedAsync(object? sender, System.Timers.ElapsedEventArgs e)
     {
-
-        //_deviceStateManager.SetBatteryLevel(random.Next(0, 100), random.Next(0, 100));
-        await _dataSendService.RemoteUpdateStatus();
+        if(_comDataService.IsConnected())
+            await _dataSendService.RemoteUpdateStatus();
     }
 
 
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
+
         _timer.Start();
         var port = _configuration["DataSetting:Port"];
         var baudratestr = _configuration["DataSetting:Baudrate"];
@@ -58,9 +59,13 @@ public class DoBackGroud : IHostedService
         {
             int baudrate = int.Parse(baudratestr);
             _comDataService.Open(port, baudrate);
+            if(_comDataService.IsConnected())
+            {
+                await _dataSendService.RemoteUpdateStatus();
+            }
         }
         
-        return Task.CompletedTask;
+        //return Task.CompletedTask;
 
     }
 

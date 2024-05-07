@@ -1,4 +1,5 @@
 ﻿@using MARM.Data;
+@using MARM.Enums
 @using MARM.Services
 
 @inject NavigationManager Nav
@@ -6,6 +7,7 @@
 @inject ISnackbar Snackbar
 @inject INavalTreeManagerService NavalTreeManagerService
 @inject IDialogService DialogService
+@inject IDataSendService dataSender
 
 <style>
     .naval-mission-selected {
@@ -115,13 +117,21 @@
     private string CreateNavalUnitMisionNote { get; set; } = "";
     private DateTime? CreateNavalUnitMisionStartAt { get; set; }
 
+    private string CurrentMissionUrl { get; set; } = "";
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        NavalTreeManagerService.ShotButtonPushed += HandleShotButtonPushed;
         if (NavalTreeManagerService.SelectedNavalMission != null)
         {
             SelectedNavalMission = NavalTreeManagerService.SelectedNavalMission;
         }
+    }
+
+    private void HandleShotButtonPushed(string url)
+    {
+        Nav.NavigateTo(url);
     }
 
     public override async Task SetParametersAsync(ParameterView parameters)
@@ -272,6 +282,8 @@
 
     private void GotoNavalMission(NavalMission mission)
     {
+        NavalTreeManagerService.MissionUrl = $"/mission/{mission.Id}";
+        Console.WriteLine($"/mission/{mission.Id}");
         Nav.NavigateTo($"/mission/{mission.Id}");
     }
 }
