@@ -7,5 +7,6 @@
         NavalMission? SelectedNavalMission { get; set; }
         HashSet<NavalUnitModel>? NavalUnits { get; set; }
         string MissionUrl { get; set; }
+        bool ShotStatus { get; set; }
     }
 }

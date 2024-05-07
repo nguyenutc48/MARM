@@ -39,6 +39,7 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public NavalMission? SelectedNavalMission { get; set; }
     public List<ButtonLightPageModel> ButtonLightPages { get; set; }
     public string MissionUrl { get; set; } = "";
+    public bool ShotStatus { get; set; } = false;
 
     private DataSendService _dataSendService;
 
