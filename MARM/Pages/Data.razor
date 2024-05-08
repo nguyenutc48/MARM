@@ -1,47 +1,59 @@
 ﻿@page "/data"
+@using MARM.Data
+@using Newtonsoft.Json
+
+@inject ApplicationDbContext ApplicationDb
+@inject ISnackbar Snackbar
 
 <div class="d-flex flex-grow-1 gap-2">
-    <MudCard>
-        <MudCardHeader>
-            <MudText Typo="Typo.h4">Dữ liệu kết quả bắn</MudText>
-        </MudCardHeader>
-        <MudCardContent>
-            <MudDatePicker/>
-        </MudCardContent>
-        <MudCardActions>
-            <MudButton>Kiểm tra</MudButton>
-        </MudCardActions>
-    </MudCard>
-    <MudDataGrid T="Element" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
-                 Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Periodic Elements</MudText>
-            <MudSpacer />
-            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        </ToolBarContent>
-        <Columns>
-            <SelectColumn T="Element" />
-            <PropertyColumn Property="x => x.Number" Title="Nr" Sortable="false" Filterable="false" />
-            <PropertyColumn Property="x => x.Sign" />
-            <PropertyColumn Property="x => x.Name" SortBy="@_sortBy" />
-            <PropertyColumn Property="x => x.Position" />
-            <PropertyColumn Property="x => x.Molar" Title="Molar mass" />
-            <PropertyColumn Property="x => x.Group" Title="Category" />
-        </Columns>
-        <PagerContent>
-            <MudDataGridPager T="Element" />
-        </PagerContent>
-    </MudDataGrid>
+    <div>
+        <MudCard>
+            <MudCardHeader>
+                <MudText Typo="Typo.h4">Kết quả bắn</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudDatePicker Label="Basic example" @bind-Date="ShotTimeSearch" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudSpacer/>
+                <MudButton OnClick="SearchClick">Kiểm tra</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </div>
+    <div>
+        <MudDataGrid T="BoatUnitMissionExportResult" MultiSelection="true" Items="@BoatUnitMissionExportResults" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+                     Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Kết quả trong ngày</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn T="BoatUnitMissionExportResult" />
+                <PropertyColumn Property="x => x.Index" Title="TT" />
+                <PropertyColumn Property="x => x.BoatName" Title="Đơn vị" />
+                <PropertyColumn Property="x => x.ShotTime" Title="Thời gian" />
+                <PropertyColumn Property="x => x.ShotTotal" Title="Số vết đạn trúng bia"/>
+                <PropertyColumn Property="x => x.ShotPosition" Title="Vùng trúng" />
+                <PropertyColumn Property="x => x.Note" Title="Ghi chú" />
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="BoatUnitMissionExportResult" />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+
 </div>
 
 @code {
-    private IEnumerable<Element> Elements = new List<Element>();
+    private List<BoatUnitMissionExportResult> BoatUnitMissionExportResults = new List<BoatUnitMissionExportResult>();
+    private DateTime? ShotTimeSearch = DateTime.Now;
     private string _searchString;
     private bool _sortNameByLength;
     private List<string> _events = new();
     // custom sort by name length
-    private Func<Element, object> _sortBy => x =>
+    private Func<BoatUnitMissionResult, object> _sortBy => x =>
     {
         if (_sortNameByLength)
             return x.Name.Length;
@@ -49,18 +61,18 @@
             return x.Name;
     };
     // quick filter - filter globally across multiple columns with the same input
-    private Func<Element, bool> _quickFilter => x =>
+    private Func<BoatUnitMissionExportResult, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Sign.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.BoatName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.ShotPosition.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if ($"{x.Number} {x.Position} {x.Molar}".Contains(_searchString))
+        if ($"{x.ShotTotal}".Contains(_searchString))
             return true;
 
         return false;
@@ -68,21 +80,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+
+    }
+
+    private void SearchClick()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            BoatUnitMissionExportResults = await ApplicationDb.GetAllBoatUnitMissions(ShotTimeSearch);
+            Console.WriteLine(JsonConvert.SerializeObject(BoatUnitMissionExportResults));
+            StateHasChanged();
+        });
+
     }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<Element> args)
+    void RowClicked(DataGridRowClickEventArgs<BoatUnitMissionExportResult> args)
     {
         _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
     }
 
-    void RowRightClicked(DataGridRowClickEventArgs<Element> args)
+    void RowRightClicked(DataGridRowClickEventArgs<BoatUnitMissionExportResult> args)
     {
         _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
     }
 
-    void SelectedItemsChanged(HashSet<Element> items)
+    void SelectedItemsChanged(HashSet<BoatUnitMissionExportResult> items)
     {
         _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
     }

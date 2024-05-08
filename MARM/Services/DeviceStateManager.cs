@@ -25,6 +25,8 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
     public event Action<int, bool>? LightStateChanged;
 
     public event Action<string>? ShotButtonPushed;
+    public event Action<bool>? ShotStatusChanged;
+    public event Action<string>? AddListShotChanged;
 
     public event Action<int>? PageChanged;
     public event Action<string>? PageNameChanged;
@@ -78,29 +80,6 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
 
     private async void _dataSendService_ButtonReceived(byte buttonAddress)
     {
-        if (buttonAddress == (int)ButtonMode.Shot)
-        {
-            if(MissionUrl != "")
-            {
-                Console.WriteLine(MissionUrl);
-                ButtonLightControl(buttonAddress);
-                ShotButtonPushed.Invoke(MissionUrl);
-            }
-            else
-            {
-                Console.WriteLine("url null");
-                var pageNal = ButtonLightPages.FirstOrDefault(p => p.ButtonAddr == (int)ButtonMode.Data);
-                if (pageNal != null)
-                {
-                    NavigateTo(pageNal.PageName.Trim());
-                }
-            }
-            
-        }
-        if (buttonAddress == (int)ButtonMode.ErrorConfirm)
-        { 
-            await _dataSendService.LightControl((int)Light.ErrorConfirm, false); 
-        }
         var pageExist = ButtonLightPages.FirstOrDefault(p=>p.ButtonAddr == buttonAddress);
         if (pageExist != null)
         {
@@ -110,7 +89,11 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
             }
             else
             {
-                if(buttonAddress == (int)ButtonMode.PrevPage)
+                if (buttonAddress == (int)ButtonMode.ErrorConfirm)
+                {
+                    await _dataSendService.LightControl((int)Light.ErrorConfirm, false);
+                }
+                if (buttonAddress == (int)ButtonMode.PrevPage)
                 {
                     await _dataSendService.LightControl((int)Light.PrevPage, true);
                     await Task.Delay(200);
@@ -121,6 +104,43 @@ public class DeviceStateManager : ITargetConnectStateManager, ILightController, 
                     await _dataSendService.LightControl((int)Light.BackPage, true);
                     await Task.Delay(200);
                     NavigateBack();
+                }
+                if (buttonAddress == (int)ButtonMode.StopShot)
+                {
+                    ShotStatus = false;
+                    ShotStatusChanged?.Invoke(false);
+                    await _dataSendService.LightControl((int)Light.StopShot, true);
+                    await _dataSendService.LightControl((int)Light.Shot, false);
+                    await Task.Delay(200);
+                    await _dataSendService.LightControl((int)Light.StopShot, false);
+                }
+                if (buttonAddress == (int)ButtonMode.Shot)
+                {
+                    if (MissionUrl != "")
+                    {
+                        ShotStatus = true;
+                        Console.WriteLine(MissionUrl);
+                        ButtonLightControl(buttonAddress);
+                        ShotButtonPushed?.Invoke(MissionUrl);
+                        ShotStatusChanged?.Invoke(true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("url null");
+                        var pageNal = ButtonLightPages.FirstOrDefault(p => p.ButtonAddr == (int)ButtonMode.Data);
+                        if (pageNal != null)
+                        {
+                            NavigateTo(pageNal.PageName.Trim());
+                        }
+                    }
+
+                }
+                if(buttonAddress == (int)ButtonMode.AddList)
+                {
+                    AddListShotChanged?.Invoke("Tau A");
+                    await _dataSendService.LightControl((int)Light.AddList, true);
+                    await Task.Delay(200);
+                    await _dataSendService.LightControl((int)Light.AddList, false);
                 }
             }
         }

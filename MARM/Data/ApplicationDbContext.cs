@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using System.Xml.Linq;
 namespace MARM.Data;
 
@@ -124,6 +126,60 @@ public class ApplicationDbContext : DbContext
     }
 
     private static readonly Random rnd = new();
+
+    public async Task<IEnumerable<BoatUnitMissionResult>> GetAllBoatUnitMissions()
+    {
+        return await BoatUnitMissions.Select((BoatUnitMission,index) => new BoatUnitMissionResult
+        {
+            Index = index+1,
+        }).ToListAsync();
+    }
+    public async Task<List<BoatUnitMissionExportResult>> GetAllBoatUnitMissions(DateTime? dateTime)
+    {
+        DateTime date = dateTime ?? DateTime.Now;
+        List<BoatUnitMissionExportResult> boatUnitMissionExportResults = new List<BoatUnitMissionExportResult>();
+        var query = from boatUnit in BoatUnitMissions
+                    join boatShotResult in BoatUnitShots on boatUnit.Id equals boatShotResult.BoatUnitId
+                    where boatShotResult.Time.Date == date.Date
+                    select new
+                    {
+                        boatUnit.Id,
+                        boatUnit.Name,
+                        boatShotResult.Time,
+                        boatShotResult.Position,
+                        boatUnit.Note
+                    };
+        var result = await query.GroupBy(g=>g.Id).ToListAsync();
+        Console.WriteLine(JsonConvert.SerializeObject(result));
+        int index = 1;
+        foreach (var newBoat in result)
+        {
+            BoatUnitMissionExportResult boatUnitMissionExportResult = new BoatUnitMissionExportResult();
+            var boat = await BoatUnitMissions.FirstOrDefaultAsync(b=>b.Id == newBoat.Key);
+            boatUnitMissionExportResult.BoatName = boat.Name;
+            boatUnitMissionExportResult.Note = boat.Note;
+            int totalShot = 0;
+            int[] shotCounts = new int[16];
+            foreach (var item in newBoat)
+            {
+                totalShot++;
+                shotCounts[item.Position]++;
+            }
+            boatUnitMissionExportResult.ShotTotal = totalShot;
+            boatUnitMissionExportResult.ShotTime = newBoat.First().Time;
+
+            var indexes = shotCounts.Select((value, index) => new { value, index })
+               .Where(item => item.value != 0)
+               .Select(item => item.index+1);
+
+            boatUnitMissionExportResult.ShotPosition = string.Join(",", indexes);
+            boatUnitMissionExportResults.Add(boatUnitMissionExportResult);
+            index++;
+        }
+        Console.WriteLine(JsonConvert.SerializeObject(boatUnitMissionExportResults));
+        return boatUnitMissionExportResults;
+    }
+
     public async Task<IEnumerable<BoatUnitMission>> GetBoatUnitMissions(Guid id)
     {
         var boards = await BoatUnitMissions.Where(u => u.MissionId == id).ToListAsync();
@@ -236,5 +292,6 @@ public class ApplicationDbContext : DbContext
         await SaveChangesAsync();
         return new Result() { IsSuccess = true, Message = "", };
     }
+
 }
 

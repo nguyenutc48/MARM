@@ -10,6 +10,7 @@
 @inject IDialogService DialogService
 @inject IDataSendService dataSender
 @inject IPageNavigationService pageNavi
+@inject INavalTreeManagerService navalTreeManager
 
 <style>
     .boat-unit-selected {
@@ -265,6 +266,9 @@
     [Parameter]
     public string? MissionIdStr { get; set; }
 
+    private string? BoatNameOld { get; set; } = "Đơn vị";
+    private int NameCountRandom = 0;
+
     private string Error { get; set; } = "";
     public readonly NavalMission Mission = new();
 
@@ -306,6 +310,9 @@
     {
         await base.OnInitializedAsync();
         dataSender.ShotStateReceived += HandlShotStateReceived;
+        dataSender.ButtonReceived += HandleButtonReceived;
+        navalTreeManager.ShotStatusChanged += HandleShotStatusChanged;
+        navalTreeManager.AddListShotChanged += HandleAddListShotChanged;
         if (string.IsNullOrEmpty(MissionIdStr))
         {
             Error = "Không tìm thấy thông tin nhiệm vụ với id trống";
@@ -364,43 +371,126 @@
         }
     }
 
-    private void HandlShotStateReceived(byte[] data)
+    private  void HandleAddListShotChanged(string name)
     {
         _ = InvokeAsync(async () =>
         {
-            await Task.Delay(100);
-            if (data[0] == (byte)RemoteAddress.Main)
+            IsCreatingBoatUnitMission = true;
+
+            var result = await ApplicationDb.CreateNewBoatUnitMission(Mission.Id, BoatNameOld + "_" + NameCountRandom, "");
+
+            if (!result.IsSuccess)
+            {
+                Snackbar.Add(result.Message, Severity.Error);
+            }
+            else if (result.Value is null)
+            {
+                Snackbar.Add("Lỗi dữ liệu tạo đơn vị mới", Severity.Error);
+            }
+            else
+            {
+                BoatUnitMissionResults.Add(new BoatUnitMissionResult()
+                    {
+                        Id = result.Value.Id,
+                        Index = BoatUnitMissionResults.Count + 1,
+                        Name = result.Value.Name,
+                        Note = result.Value.Note,
+                    });
+            }
+
+            IsCreatingBoatUnitMission = false;
+            NameCountRandom++;
+            StateHasChanged();
+        });
+        
+    }
+
+    private void HandleButtonReceived(byte buttonAddr)
+    {
+        _ = InvokeAsync(() =>
+        {
+            if (BoatUnitMissionResults.Count > 0)
             {
                 if (SelectedBoatUnitMissionResult != null)
                 {
-                    int shotPosition = (data[1] >> 4) & 0xF;
-                    var result = await ApplicationDb.CreateBoatUnitShot(SelectedBoatUnitMissionResult.Id, shotPosition);
-                    if (!result.IsSuccess)
+                    if (buttonAddr == (int)ButtonMode.BackShot)
                     {
-                        Snackbar.Add(result.Message, Severity.Error);
+                        if (SelectedBoatUnitMissionResult.Index < BoatUnitMissionResults.Count)
+                            SelectedBoatUnitMissionResult = BoatUnitMissionResults.Where(b => b.Index == (SelectedBoatUnitMissionResult.Index + 1)).FirstOrDefault();
+                        else
+                            Snackbar.Add("Hết danh sách", Severity.Warning);
                     }
-                    else if (result.Value is null)
+                    if (buttonAddr == (int)ButtonMode.PrevShot)
                     {
-                        Snackbar.Add("Lỗi dữ liệu bắn", Severity.Error);
+                        if (SelectedBoatUnitMissionResult.Index > 1)
+                            SelectedBoatUnitMissionResult = BoatUnitMissionResults.Where(b => b.Index == (SelectedBoatUnitMissionResult.Index - 1)).FirstOrDefault();
+                        else
+                            Snackbar.Add("Hết danh sách", Severity.Warning);
                     }
-                    else
+                }
+                else
+                {
+                    if (buttonAddr == (int)ButtonMode.PrevShot || buttonAddr == (int)ButtonMode.BackShot)
                     {
-                        MainBoatUnitShots.Add(new BoatUnitShotDetail()
-                            {
-                                Id = result.Value.Id,
-                                Index = MainBoatUnitShots.Count() + 1,
-                                Time = result.Value.Time,
-                                Position = result.Value.Position+1,
-                            });
+                        SelectedBoatUnitMissionResult = BoatUnitMissionResults[0];
                     }
-                    SelectedBoatUnitMissionResult.ShotCounts[shotPosition] += 1;
-                    SelectedBoatUnitMissionResult.ShotTotal += 1;
                 }
             }
+            else
+                Snackbar.Add("Cần phải thêm nhiệm vụ bắn trước", Severity.Warning);
             StateHasChanged();
         });
 
+    }
 
+    private void HandleShotStatusChanged(bool status)
+    {
+        if (status == false)
+            Snackbar.Add("Đã dừng bắn", Severity.Warning);
+        else
+            Snackbar.Add("Bắt đầu bắn", Severity.Success);
+    }
+
+    private void HandlShotStateReceived(byte[] data)
+    {
+        if (navalTreeManager.ShotStatus)
+        {
+            _ = InvokeAsync(async () =>
+            {
+                await Task.Delay(100);
+                if (data[0] == (byte)RemoteAddress.Main)
+                {
+                    if (SelectedBoatUnitMissionResult != null)
+                    {
+                        int shotPosition = (data[1] >> 4) & 0xF;
+                        var result = await ApplicationDb.CreateBoatUnitShot(SelectedBoatUnitMissionResult.Id, shotPosition);
+                        if (!result.IsSuccess)
+                        {
+                            Snackbar.Add(result.Message, Severity.Error);
+                        }
+                        else if (result.Value is null)
+                        {
+                            Snackbar.Add("Lỗi dữ liệu bắn", Severity.Error);
+                        }
+                        else
+                        {
+                            MainBoatUnitShots.Add(new BoatUnitShotDetail()
+                                {
+                                    Id = result.Value.Id,
+                                    Index = MainBoatUnitShots.Count() + 1,
+                                    Time = result.Value.Time,
+                                    Position = result.Value.Position + 1,
+                                });
+                        }
+                        SelectedBoatUnitMissionResult.ShotCounts[shotPosition] += 1;
+                        SelectedBoatUnitMissionResult.ShotTotal += 1;
+                    }
+                }
+                StateHasChanged();
+            });
+
+
+        }
     }
 
     private void NavigateBack()
@@ -433,6 +523,7 @@
     {
         string note = BoatUnitNote;
         string name = BoatUnitName;
+        BoatNameOld = BoatUnitName;
         BoatUnitName = "";
         BoatUnitNote = "";
 
@@ -478,6 +569,7 @@
 
         StateHasChanged();
     }
+
 
     private void BoatUnitMissionResultHasBeenCommitted(object obj)
     {
