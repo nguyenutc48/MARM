@@ -18,15 +18,12 @@
             <MudCardHeader>
                 <MudText Typo="Typo.h4">Kết quả bắn</MudText>
             </MudCardHeader>
-            <MudCardContent>
-                <MudDatePicker DateFormat="dd/MM/yyyy" Label="Basic example" @bind-Date="ShotTimeSearch" />
-                <MudSpacer/>
-                <MudButton OnClick="SearchClick" Color="MudBlazor.Color.Default" StartIcon="@Icons.Material.Filled.Checklist">Kiểm tra</MudButton>
+            <MudCardContent Class="d-flex flex-grow-1 gap-4">
+                <MudDatePicker DateFormat="dd/MM/yyyy" Label="Ngày bắt đầu" @bind-Date="ShotTimeSearch" />
+                <MudDatePicker DateFormat="dd/MM/yyyy" Label="Ngày kết thúc" @bind-Date="ShotEndTimeSearch" />
+                <MudButton OnClick="SearchClick" Color="MudBlazor.Color.Primary" StartIcon="@Icons.Material.Filled.Search">Kiểm tra</MudButton>
+                <MudButton OnClick="ExportToExcel" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.ImportExport">Xuất dữ liệu</MudButton>
             </MudCardContent>
-            <MudCardActions>
-                <MudSpacer/>
-                <MudButton OnClick="ExportToExcel" Color="MudBlazor.Color.Primary" StartIcon="@Icons.Material.Filled.ImportExport">Xuất dữ liệu</MudButton>
-            </MudCardActions>
         </MudCard>
     </div>
     <div>
@@ -58,6 +55,7 @@
 @code {
     private List<BoatUnitMissionExportResult> BoatUnitMissionExportResults = new List<BoatUnitMissionExportResult>();
     private DateTime? ShotTimeSearch = DateTime.Now;
+    private DateTime? ShotEndTimeSearch = DateTime.Now;
     private string _searchString;
     private bool _sortNameByLength;
     private List<string> _events = new();
@@ -96,7 +94,7 @@
     {
         _ = InvokeAsync(async () =>
         {
-            BoatUnitMissionExportResults = await ApplicationDb.GetAllBoatUnitMissions(ShotTimeSearch);
+            BoatUnitMissionExportResults = await ApplicationDb.GetAllBoatUnitMissions(ShotTimeSearch, ShotEndTimeSearch);
             // Console.WriteLine(JsonConvert.SerializeObject(BoatUnitMissionExportResults));
             StateHasChanged();
         });

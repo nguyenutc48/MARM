@@ -182,6 +182,55 @@ public class ApplicationDbContext : DbContext
         return boatUnitMissionExportResults;
     }
 
+    public async Task<List<BoatUnitMissionExportResult>> GetAllBoatUnitMissions(DateTime? dateTime, DateTime? dateTimeEnd)
+    {
+        DateTime date = dateTime ?? DateTime.Now;
+        DateTime dateEnd = dateTimeEnd ?? DateTime.Now;
+        List<BoatUnitMissionExportResult> boatUnitMissionExportResults = new List<BoatUnitMissionExportResult>();
+        var query = from boatUnit in BoatUnitMissions
+                    join boatShotResult in BoatUnitShots on boatUnit.Id equals boatShotResult.BoatUnitId
+                    where boatShotResult.Time.Date >= date.Date && boatShotResult.Time.Date <= dateEnd.Date
+                    select new
+                    {
+                        boatUnit.Id,
+                        boatUnit.Name,
+                        boatShotResult.Time,
+                        boatShotResult.Position,
+                        boatUnit.Note
+                    };
+        var result = await query.GroupBy(g => g.Id).ToListAsync();
+        //Console.WriteLine(JsonConvert.SerializeObject(result));
+        int index = 1;
+        foreach (var newBoat in result)
+        {
+            BoatUnitMissionExportResult boatUnitMissionExportResult = new BoatUnitMissionExportResult();
+            var boat = await BoatUnitMissions.FirstOrDefaultAsync(b => b.Id == newBoat.Key);
+            boatUnitMissionExportResult.Index = index;
+            boatUnitMissionExportResult.BoatName = boat.Name;
+            boatUnitMissionExportResult.Note = boat.Note;
+            int totalShot = 0;
+            int[] shotCounts = new int[16];
+            foreach (var item in newBoat)
+            {
+                totalShot++;
+                shotCounts[item.Position]++;
+            }
+            boatUnitMissionExportResult.ShotTotal = totalShot;
+            boatUnitMissionExportResult.ShotTime = newBoat.First().Time.ToString("dd/MM/yyyy");
+
+            var indexes = shotCounts.Select((value, index) => new { value, index })
+               .Where(item => item.value != 0)
+               .Select(item => item.index + 1);
+
+            boatUnitMissionExportResult.ShotPosition = string.Join(",", indexes);
+
+            boatUnitMissionExportResults.Add(boatUnitMissionExportResult);
+            index++;
+        }
+        //Console.WriteLine(JsonConvert.SerializeObject(boatUnitMissionExportResults));
+        return boatUnitMissionExportResults;
+    }
+
     public async Task<IEnumerable<BoatUnitMission>> GetBoatUnitMissions(Guid id)
     {
         var boards = await BoatUnitMissions.Where(u => u.MissionId == id).ToListAsync();
