@@ -31,17 +31,10 @@
     <MudAlert Variant="Variant.Filled" Severity="Severity.Error">@Error</MudAlert>
 }
 
-<div class="w-100 h-100 position-relative overflow-hidden">
-    <div class="w-100 h-100 position-absolute top-0 start-0 overflow-hidden d-flex flex-row">
-        <div class="w-50 h-100 p-2">
-            <div class="w-100 d-flex flex-row align-items-center">
-                <img src="images/boat.png" height="150" alt="device" />
-                <img src="images/wifi.png" height="50" style="transform: rotate(90deg);" alt="wifi" />
-                <div class="bg-connect"></div>
-                <img src="images/wifi.png" height="50" style="transform: rotate(-90deg);" alt="wifi" />
-                <img src="images/Picture2.png" height="100" alt="computer" />
-            </div>
-            <MudCard Elevation="6">
+<div class="w-100 h-100 d-flex flex-row p-4 gap-4 position-relative overflow-hidden">
+    <div class="w-100 h-100 d-flex flex-row flex-grow-1 gap-4">
+        <div class="w-50 flex-grow-1">
+            <MudCard Elevation="6" Class="h-100 d-flex flex-column flex-grow-1 gap-4">
                 <MudCardHeader Class="align-items-center">
                     <CardHeaderContent>
                         <div class="w-100 d-flex flex-row justify-content-between align-items-center">
@@ -56,13 +49,11 @@
                                 <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.ImportExport" />
                             </div>
                         </div>
-                        <div>
-                        </div>
                     </CardHeaderContent>
                 </MudCardHeader>
-                <MudCardContent>
-                    <MudTable T="BoatUnitMissionResult" Items="BoatUnitMissionResults" SelectedItem="@SelectedBoatUnitMissionResult"
-                              Height="430px" Bordered="false" Elevation="0" Hover Dense CanCancelEdit ReadOnly="@ListBoatUintReadOnly"
+                <MudCardContent Class="h-100">
+                    <MudTable Virtualize="true" FixedHeader="true" T="BoatUnitMissionResult" Items="BoatUnitMissionResults" SelectedItem="@SelectedBoatUnitMissionResult"
+                              Bordered="false" Elevation="0" Hover Dense CanCancelEdit ReadOnly="@ListBoatUintReadOnly"
                                SelectedItemChanged="OnSelectedBoatUnitMissionResultChanged"
                                RowClassFunc="@SelectedBoatUnitMissionResultClassFunc"
                                RowEditPreview="BackupBoatUnitMissionResult"
@@ -89,11 +80,13 @@
                                 <MudTd DataLabel="Kết quả" Style="text-align: center">@context.ShotTotal viên</MudTd>
                             <MudTd DataLabel="Ghi chú">@context.Note</MudTd>
                                 <MudTd Style="text-align: right;">
-                                    <div class="d-flex flex-row">
-                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.RemoveRedEye" />
+                                    <div class="d-flex flex-row p-2 gap-2">
+                                        <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" OnClick="@(() => ViewShotDetailResult(context))">Xem</MudButton>
+                                        @* <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.RemoveRedEye" /> *@
                                         @if (CanBeDeteleRecord)
                                     {
-                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteBoatUnitMissionResult(context))" />
+                                        @* <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteBoatUnitMissionResult(context))" /> *@
+                                        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteBoatUnitMissionResult(context))">Xóa</MudButton>
                                     }
                                 </div>
                             </MudTd>
@@ -108,9 +101,9 @@
                                 <MudTextField Margin="Margin.Dense" @bind-Value="@context.Note" />
                             </MudTd>
                         </RowEditingTemplate>
-                        <PagerContent>
+                      @*   <PagerContent>
                             <MudTablePager />
-                        </PagerContent>
+                        </PagerContent> *@
                     </MudTable>
                 </MudCardContent>
                 <MudCardActions Class="@CardActionClass">
@@ -124,50 +117,48 @@
                 </MudCardActions>
             </MudCard>
         </div>
-        <div class="w-50 h-100 p-2 d-flex flex-column">
-
-            <div class="flex-grow-1 d-flex flex-column">
+        <div class="w-50 h-100 d-flex flex-column gap-2 flex-grow-1">
+            <div class="w-100 d-flex flex-row flex-grow-0 align-items-center justify-content-end">
+                <img src="images/boat.png" height="150" alt="device" />
+                <img src="images/wifi.png" height="50" style="transform: rotate(90deg);" alt="wifi" />
+                <div class="bg-connect"></div>
+                <img src="images/wifi.png" height="50" style="transform: rotate(-90deg);" alt="wifi" />
+                <img src="images/Picture2.png" height="100" alt="computer" />
+            </div>
+            <MudCard Elevation="6" Class="d-flex flex-column flex-grow-1">
                 <div class="d-flex justify-content-center">
                     <MudText Typo="Typo.h6">Mặt hứng đạn chính</MudText>
                 </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
+                <div class="d-flex flex-row flex-grow-1  mt-1 mx-3">
                     <MatHungDan Index="1" ShotCount="@ShotCountAt1" />
                     <MatHungDan Index="2" ShotCount="@ShotCountAt2" />
                     <MatHungDan Index="3" ShotCount="@ShotCountAt3" />
-                    <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
                 </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
+                <div class="d-flex flex-row flex-grow-1  mt-1 mx-3">
+                    <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
                     <MatHungDan Index="5" ShotCount="@ShotCountAt5" />
                     <MatHungDan Index="6" ShotCount="@ShotCountAt6" />
-                    <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
-                    <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
                 </div>
-            </div>
-            <div class="flex-grow-1 d-flex flex-column">
+            </MudCard>
+            <MudCard Elevation="6" Class="flex-grow-1 d-flex flex-column">
                 <div class="d-flex justify-content-center">
                     <MudText Typo="Typo.h6">Mặt hứng đạn phụ</MudText>
                 </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
+                <div class="flex-grow-1 d-flex flex-row mt-1 mx-3">
+                    <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
+                    <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
                     <MatHungDan Index="9" ShotCount="@ShotCountAt9" />
+                </div>
+                <div class="flex-grow-1 d-flex flex-row mt-1 mx-3">
                     <MatHungDan Index="10" ShotCount="@ShotCountAt10" />
                     <MatHungDan Index="11" ShotCount="@ShotCountAt11" />
                     <MatHungDan Index="12" ShotCount="@ShotCountAt12" />
                 </div>
-                <div class="flex-grow-1 d-flex flex-row mt-1">
-                    <MatHungDan Index="13" ShotCount="@ShotCountAt13" />
-                    <MatHungDan Index="14" ShotCount="@ShotCountAt14" />
-                    <MatHungDan Index="15" ShotCount="@ShotCountAt15" />
-                    <MatHungDan Index="16" ShotCount="@ShotCountAt16" />
-                </div>
-            </div>
-            <div class="d-flex flex-row-reverse">
-                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary" Style="text-transform:none" Disabled="@ViewDetailDisable" OnClick="ViewDetail">
-                    Xem chi tiết
-                </MudButton>
-            </div>
+            </MudCard>
         </div>
-     </div>
- </div>
+    </div>
+</div>
+
 
  <MudOverlay Visible="ShowDetailBoatShots" DarkBackground>
     <MudCard Style="min-width: 1900px;">
@@ -184,27 +175,25 @@
                         <MatHungDan Index="1" ShotCount="@ShotCountAt1" />
                         <MatHungDan Index="2" ShotCount="@ShotCountAt2" />
                         <MatHungDan Index="3" ShotCount="@ShotCountAt3" />
-                        <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
                     </div>
                     <div class="d-flex flex-row mt-1">
+                        <MatHungDan Index="4" ShotCount="@ShotCountAt4" />
                         <MatHungDan Index="5" ShotCount="@ShotCountAt5" />
                         <MatHungDan Index="6" ShotCount="@ShotCountAt6" />
-                        <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
-                        <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
+                 
                     </div>
                 </div>
                 <div class="flex-grow-1 d-flex flex-column">
                     <div class="d-flex flex-row mt-1">
+                        <MatHungDan Index="7" ShotCount="@ShotCountAt7" />
+                        <MatHungDan Index="8" ShotCount="@ShotCountAt8" />
                         <MatHungDan Index="9" ShotCount="@ShotCountAt9" />
+
+                    </div>
+                    <div class="d-flex flex-row mt-1">
                         <MatHungDan Index="10" ShotCount="@ShotCountAt10" />
                         <MatHungDan Index="11" ShotCount="@ShotCountAt11" />
                         <MatHungDan Index="12" ShotCount="@ShotCountAt12" />
-                    </div>
-                    <div class="d-flex flex-row mt-1">
-                        <MatHungDan Index="13" ShotCount="@ShotCountAt13" />
-                        <MatHungDan Index="14" ShotCount="@ShotCountAt14" />
-                        <MatHungDan Index="15" ShotCount="@ShotCountAt15" />
-                        <MatHungDan Index="16" ShotCount="@ShotCountAt16" />
                     </div>
                 </div>
             </div>
@@ -402,7 +391,7 @@
             NameCountRandom++;
             StateHasChanged();
         });
-        
+
     }
 
     private void HandleButtonReceived(byte buttonAddr)
@@ -669,9 +658,9 @@
             {
                 BoatUnitMissionResults[i].Index--;
             }
-
-            Snackbar.Add(result.Message, Severity.Success);
             StateHasChanged();
+            Snackbar.Add(result.Message, Severity.Success);
+
         }
     }
 
@@ -683,5 +672,10 @@
     private void CloseDetailBoatShots()
     {
         ShowDetailBoatShots = false;
+    }
+
+    private void ViewShotDetailResult(BoatUnitMissionResult boat){
+        SelectedBoatUnitMissionResult = boat;
+        ShowDetailBoatShots = true;
     }
 }

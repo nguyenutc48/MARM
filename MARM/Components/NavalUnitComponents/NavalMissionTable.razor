@@ -24,14 +24,14 @@
 </style>
 
 
-<MudTable Class="@TableVisible" T="NavalMission" Items="Missions" SelectedItem="@SelectedNavalMission"
+<MudTable Class="@TableVisible" T="NavalMission" Items="Missions" SelectedItem="@SelectedNavalMission" Filter="new Func<NavalMission,bool>(FilterFunc1)"
           SelectedItemChanged="OnSelectedItemChanged" RowClassFunc="@SelectedRowClassFunc"
           Elevation="6" Hover>
     <ToolBarContent>
         <div class="w-100 d-flex flex-row justify-content-between align-items-center">
             <MudText> Danh sách nhiệm vụ của đơn vị <b>@UnitName</b></MudText>
             <div>
-                <MudTextField @bind-Value="searchString" Margin="Margin.Dense" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+                <MudTextField @bind-Value="_searchString" Margin="Margin.Dense" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
             </div>
         </div>
     </ToolBarContent>
@@ -107,7 +107,7 @@
 
     private MudTable<NavalMission>? MissionTable { get; set; }
     private List<NavalMission> Missions { get; set; } = new List<NavalMission>();
-    private string searchString = "";
+    private string _searchString = "";
     private string UnitName => NavalUnit?.Name ?? "";
     private string TableVisible => NavalUnit is null ? "d-none" : "h-100";
 
@@ -127,6 +127,21 @@
         {
             SelectedNavalMission = NavalTreeManagerService.SelectedNavalMission;
         }
+    }
+
+    private bool FilterFunc1(NavalMission element) => FilterFunc(element, _searchString);
+
+    private bool FilterFunc(NavalMission element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Note.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.BoatCount}".Contains(searchString))
+            return true;
+        return false;
     }
 
     private void HandleShotButtonPushed(string url)
