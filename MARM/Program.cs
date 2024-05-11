@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using MARM;
@@ -32,6 +33,7 @@ builder.Services.AddSingleton<ILightController>(sp => sp.GetRequiredService<Devi
 builder.Services.AddSingleton<ITransmitterDeviceManager>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<IPageNavigationService>(sp => sp.GetRequiredService<DeviceStateManager>());
 builder.Services.AddSingleton<INavalTreeManagerService>(sp => sp.GetRequiredService<DeviceStateManager>());
+builder.Services.AddTransient<IExcelExportService, ExcelExportService>();
 
 
 builder.Services.AddSingleton<MissionManager>();

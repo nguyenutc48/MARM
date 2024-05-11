@@ -150,12 +150,13 @@ public class ApplicationDbContext : DbContext
                         boatUnit.Note
                     };
         var result = await query.GroupBy(g=>g.Id).ToListAsync();
-        Console.WriteLine(JsonConvert.SerializeObject(result));
+        //Console.WriteLine(JsonConvert.SerializeObject(result));
         int index = 1;
         foreach (var newBoat in result)
         {
             BoatUnitMissionExportResult boatUnitMissionExportResult = new BoatUnitMissionExportResult();
             var boat = await BoatUnitMissions.FirstOrDefaultAsync(b=>b.Id == newBoat.Key);
+            boatUnitMissionExportResult.Index = index;
             boatUnitMissionExportResult.BoatName = boat.Name;
             boatUnitMissionExportResult.Note = boat.Note;
             int totalShot = 0;
@@ -166,17 +167,18 @@ public class ApplicationDbContext : DbContext
                 shotCounts[item.Position]++;
             }
             boatUnitMissionExportResult.ShotTotal = totalShot;
-            boatUnitMissionExportResult.ShotTime = newBoat.First().Time;
+            boatUnitMissionExportResult.ShotTime = newBoat.First().Time.ToString("dd/MM/yyyy");
 
             var indexes = shotCounts.Select((value, index) => new { value, index })
                .Where(item => item.value != 0)
                .Select(item => item.index+1);
 
             boatUnitMissionExportResult.ShotPosition = string.Join(",", indexes);
+            
             boatUnitMissionExportResults.Add(boatUnitMissionExportResult);
             index++;
         }
-        Console.WriteLine(JsonConvert.SerializeObject(boatUnitMissionExportResults));
+        //Console.WriteLine(JsonConvert.SerializeObject(boatUnitMissionExportResults));
         return boatUnitMissionExportResults;
     }
 

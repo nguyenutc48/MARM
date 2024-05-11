@@ -1,27 +1,36 @@
 ﻿@page "/data"
 @using MARM.Data
+@using MARM.Services
 @using Newtonsoft.Json
 
+@using Microsoft.JSInterop;
+@inject IJSRuntime JSRuntime
+
+@inject IWebHostEnvironment WebHostEnvironment
 @inject ApplicationDbContext ApplicationDb
 @inject ISnackbar Snackbar
+@inject IExcelExportService excelExportService
 
-<div class="d-flex flex-grow-1 gap-2">
+
+<div class="d-flex flex-column flex-grow-1 gap-2 p-4">
     <div>
         <MudCard>
             <MudCardHeader>
                 <MudText Typo="Typo.h4">Kết quả bắn</MudText>
             </MudCardHeader>
             <MudCardContent>
-                <MudDatePicker Label="Basic example" @bind-Date="ShotTimeSearch" />
+                <MudDatePicker DateFormat="dd/MM/yyyy" Label="Basic example" @bind-Date="ShotTimeSearch" />
+                <MudSpacer/>
+                <MudButton OnClick="SearchClick" Color="MudBlazor.Color.Default" StartIcon="@Icons.Material.Filled.Checklist">Kiểm tra</MudButton>
             </MudCardContent>
             <MudCardActions>
                 <MudSpacer/>
-                <MudButton OnClick="SearchClick">Kiểm tra</MudButton>
+                <MudButton OnClick="ExportToExcel" Color="MudBlazor.Color.Primary" StartIcon="@Icons.Material.Filled.ImportExport">Xuất dữ liệu</MudButton>
             </MudCardActions>
         </MudCard>
     </div>
     <div>
-        <MudDataGrid T="BoatUnitMissionExportResult" MultiSelection="true" Items="@BoatUnitMissionExportResults" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+        <MudDataGrid T="BoatUnitMissionExportResult" MultiSelection="false" Items="@BoatUnitMissionExportResults" SortMode="SortMode.Multiple" Filterable="false" QuickFilter="@_quickFilter"
                      Hideable="true" RowClick="@RowClicked" RowContextMenuClick="RowRightClicked" SelectedItemsChanged="@SelectedItemsChanged">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Kết quả trong ngày</MudText>
@@ -30,7 +39,7 @@
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <Columns>
-                <SelectColumn T="BoatUnitMissionExportResult" />
+                @* <SelectColumn T="BoatUnitMissionExportResult" /> *@
                 <PropertyColumn Property="x => x.Index" Title="TT" />
                 <PropertyColumn Property="x => x.BoatName" Title="Đơn vị" />
                 <PropertyColumn Property="x => x.ShotTime" Title="Thời gian" />
@@ -88,10 +97,18 @@
         _ = InvokeAsync(async () =>
         {
             BoatUnitMissionExportResults = await ApplicationDb.GetAllBoatUnitMissions(ShotTimeSearch);
-            Console.WriteLine(JsonConvert.SerializeObject(BoatUnitMissionExportResults));
+            // Console.WriteLine(JsonConvert.SerializeObject(BoatUnitMissionExportResults));
             StateHasChanged();
         });
 
+    }
+
+    async Task ExportToExcel()
+    {
+        var content = await excelExportService.ExportToExcelAsync(BoatUnitMissionExportResults);
+        var fileName = DateTime.Now.ToString("ddMMyyyy_hhmm")+"_shotresult.xlsx";
+        await JSRuntime.InvokeVoidAsync("exportToExcel", Convert.ToBase64String(content), fileName);
+        Snackbar.Add("Đã xuất file thành công!", Severity.Success);
     }
 
     // events
