@@ -1,19 +1,85 @@
-﻿@inherits LayoutComponentBase
+﻿
+@inherits LayoutComponentBase
 
 <PageTitle>AK</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+
+<header class="d-flex flex-column" style="height: 150px">
+    <img class="w-100 h-100" src="images/Picture1.png" />
+    <div class="d-flex flex-row flex-grow-1 gap-1 w-100 justify-content-between">
+        <h3 class="flex-shrink-1 w-100 text-center">
+            THIẾT BỊ GIÁM SÁT KẾT QUẢ BẮN BÀI 3 AK ỨNG DỤNG TRÊN BIỂN
+        </h3>
+        <div class="d-flex flex-row">
+            <MudIconButton OnClick="@MinimizeApp" Icon="@Icons.Material.Filled.Minimize" Color="Color.Primary" />
+            <MudIconButton OnClick="@CloseApp"  Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+        </div>
+    </div>
+</header>
+<main class="p-1">
+   @*  <div class="w-100 position-relative"> *@
+        @Body
+ @*    </div> *@
+</main>
+<footer class="w-100 d-flex justify-content-between align-items-center" style="background-color: #FFD966;">
+    <div>
+        <MudIconButton @onclick="NavigateBack" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
+    </div>
+    <div class="d-flex flex-row align-items-center">
+
+        <div class="nav-item">
+            <NavLink @onclick="DashboardClick" class="nav-link" href="/ak/dashboard">
+                <span class="mdi mdi-view-dashboard mdi-24px" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink @onclick="SettingClick" class="nav-link" href="/setting">
+                <span class="mdi mdi-cog mdi-24px" aria-hidden="true"></span> Setting
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink @onclick="CheckClick" class="nav-link" href="/checklist" >
+                <span class="mdi mdi-playlist-check mdi-24px" aria-hidden="true"></span> Kiểm tra hệ thống
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink @onclick="DataClick" class="nav-link" href="/navalunits">
+                <span class="mdi mdi-ship-wheel mdi-24px" aria-hidden="true"></span> Quản lý đơn vị
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink @onclick="DataExportClick" class="nav-link" href="/data">
+                <span class="mdi mdi-database mdi-24px" aria-hidden="true"></span> Quản lý kết quả
+            </NavLink>
+        </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+    <div>
+        <MudIconButton @onclick="NavigateForward" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
+    </div>
+</footer>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+@code{
+    //style="@($"color: {colorButton}; background:{backgroundButton};")"
+    private void NavigateBack(){}
+    private void DashboardClick(){}
+    private void SettingClick(){}
+    private void CheckClick(){}
+    private void DataClick(){}
+    private void DataExportClick(){}
+    private void NavigateForward(){}
+
+    private void CloseApp()
+    {
+        Electron.WindowManager.BrowserWindows.First().Close();
+    }
+
+    private void MinimizeApp()
+    {
+        Electron.WindowManager.BrowserWindows.First().Minimize();
+    }
+}
